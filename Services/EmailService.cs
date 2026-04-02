@@ -27,7 +27,7 @@ namespace MSEMC.Services
 
             var mensagemParaEmail = new MailMessage
             {
-                From = new MailAddress("matheusmeigre@gmail.com"),
+                From = new MailAddress(emailApp),
                 Subject = requisicao.Assunto,
                 Body = requisicao.Conteudo,
                 IsBodyHtml = true
