@@ -1,0 +1,54 @@
+name: MSEMC Secure Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    #Variáveis seguras (vindas do GitHub Secrets)
+    env:
+      EmailSettings__Password: ${{ secrets.SENHA_DO_APP }}
+      EmailSettings__Email: ${{ secrets.EMAIL_APP }}
+
+    steps:
+      #Baixar código
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      #Verificar vulnerabilidades (dependências)
+      - name: Security Audit
+        run: dotnet list package --vulnerable || true
+
+      #Setup do .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      #Restore (dependências)
+      - name: Restore dependencies
+        run: dotnet restore
+
+      #Build com validação
+      - name: Build
+        run: dotnet build --no-restore --configuration Release
+
+      #Testes (se existirem)
+      - name: Run Tests
+        run: dotnet test --no-build --verbosity normal
+
+      #Análise de código (opcional mas recomendado)
+      - name: Code Analysis
+        run: dotnet build /p:EnableNETAnalyzers=true
+
+      #Publicação
+      - name: Publish
+        run: dotnet publish -c Release -o out
+
+      #Deploy (exemplo genérico)
+      - name: Deploy (simulado)
+        run: echo "Aqui você conecta com Render, Railway ou Azure"
