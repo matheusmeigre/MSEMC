@@ -6,7 +6,7 @@ namespace MSEMC.Services
 {
     public class EmailService
     {
-        public void SendEmail(RequisicaoEmail requisicao) 
+        public void EnviarEmail(RequisicaoEmail requisicao) 
         {
             var smtpClient = new SmtpClient("smtp.gmail.com")
             {
