@@ -22,6 +22,9 @@ namespace MSEMC.Services
                 Body = requisicao.Conteudo,
                 IsBodyHtml = true
             };
+
+            mensagemParaEmail.To.Add(requisicao.Destinatario);
+            smtpClient.Send(mensagemParaEmail);
         }
     }
 }
