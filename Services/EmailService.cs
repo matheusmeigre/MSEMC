@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Linq.Expressions;
+using System.Net;
 using System.Net.Mail;
 using MSEMC.Models;
 
@@ -6,10 +7,10 @@ namespace MSEMC.Services
 {
     public class EmailService
     {
-        private readonly IConfiguration _config;
-        public EmailService(IConfiguration config)
+        private readonly ILogger<EmailService> _logger;
+        public EmailService(ILogger<EmailService> logger)
         {
-            _config = config;
+            _logger = logger;
         }
 
         public void EnviarEmail(RequisicaoEmail requisicao) 
@@ -34,7 +35,28 @@ namespace MSEMC.Services
             };
 
             mensagemParaEmail.To.Add(requisicao.Destinatario);
-            smtpClient.Send(mensagemParaEmail);
+            _logger.LogInformation("Atribuindo mensagemParaEmail ao Destinatario");
+
+            bool sendMessage = false;
+            try
+            {
+                if (sendMessage)
+                {
+                    smtpClient.Send(mensagemParaEmail);
+                    sendMessage = true;
+                    _logger.LogInformation($"Mensagem enviada com sucesso para: {requisicao.Destinatario} em: {DateTime.UtcNow}");
+                }
+                else 
+                {
+                    sendMessage = false;
+                    _logger.LogInformation($"Mensagem não enviada para: {requisicao.Destinatario} houveram problemas em: {DateTime.UtcNow}");
+                }
+            }
+            catch (Exception ex)
+            {
+                sendMessage = false;
+                _logger.LogError($"Envio de mensagem não realizado: {ex.Message} - Data: {DateTime.UtcNow}");
+            }
+            }
         }
     }
-}
