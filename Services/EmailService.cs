@@ -6,6 +6,11 @@ namespace MSEMC.Services
 {
     public class EmailService
     {
+        private readonly IConfiguration _config;
+        public EmailService(IConfiguration config) 
+        {
+            _config = config;
+        }
         public void EnviarEmail(RequisicaoEmail requisicao) 
         {
             var emailApp = _config["ConfiguracaoEmail:Email"];

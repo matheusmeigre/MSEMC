@@ -10,10 +10,12 @@ namespace MSEMC.Controllers
     public class EmailController : ControllerBase
     {
         private readonly EmailService _emailService;
+        private readonly IConfiguration _config;
 
-        public EmailController()
+        public EmailController(IConfiguration config)
         {
-            _emailService = new EmailService();
+            _config = config;
+            _emailService = new EmailService(_config);
         }
 
         [HttpPost]
