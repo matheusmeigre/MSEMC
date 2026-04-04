@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using MSEMC.Models;
 using MSEMC.Services;
 using Microsoft.Extensions.Configuration;
@@ -12,9 +11,9 @@ namespace MSEMC.Controllers
     {
         private readonly EmailService _emailService;
 
-        public EmailController(ILogger<EmailService> logger)
+        public EmailController()
         {
-            _emailService = new EmailService(logger);
+            _emailService = new EmailService();
         }
 
         [HttpPost]
