@@ -1,0 +1,71 @@
+using FluentValidation;
+using MSEMC.Abstractions;
+using MSEMC.Contracts.Requests;
+using MSEMC.Contracts.Responses;
+using MSEMC.Domain.Entities;
+
+namespace MSEMC.Endpoints;
+
+/// <summary>
+/// Minimal API endpoints for message operations.
+/// Replaces the legacy EmailController with a more idiomatic .NET 8 approach.
+/// </summary>
+public static class MessageEndpoints
+{
+    public static void MapMessageEndpoints(this IEndpointRouteBuilder app)
+    {
+        var group = app.MapGroup("/api/messages")
+            .WithTags("Messages")
+            .RequireAuthorization()
+            .RequireRateLimiting("messages");
+
+        group.MapPost("/", SendMessage)
+            .WithName("SendMessage")
+            .WithSummary("Queue an email message for delivery")
+            .WithDescription("Accepts an email and enqueues it for asynchronous delivery via the message broker.")
+            .Produces<SendEmailResponse>(StatusCodes.Status202Accepted)
+            .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status401Unauthorized)
+            .ProducesProblem(StatusCodes.Status429TooManyRequests);
+    }
+
+    private static async Task<IResult> SendMessage(
+        SendEmailRequest request,
+        IValidator<SendEmailRequest> validator,
+        IEmailQueuePublisher publisher,
+        ILogger<Program> logger,
+        CancellationToken cancellationToken)
+    {
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+        if (!validationResult.IsValid)
+        {
+            return Results.ValidationProblem(
+                validationResult.Errors
+                    .GroupBy(e => e.PropertyName)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Select(e => e.ErrorMessage).ToArray()));
+        }
+
+        var message = EmailMessage.Create(
+            recipient: request.Recipient,
+            subject: request.Subject,
+            body: request.Body,
+            isHtml: request.IsHtml,
+            ccRecipients: request.CcRecipients,
+            bccRecipients: request.BccRecipients);
+
+        logger.LogInformation(
+            "Accepted email request for {Recipient} (MessageId: {MessageId})",
+            request.Recipient, message.Id);
+
+        await publisher.PublishAsync(message, cancellationToken);
+
+        var response = new SendEmailResponse(
+            MessageId: message.Id,
+            Status: message.Status.ToString(),
+            AcceptedAt: message.CreatedAt);
+
+        return Results.Accepted($"/api/messages/{message.Id}", response);
+    }
+}

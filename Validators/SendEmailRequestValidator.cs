@@ -25,7 +25,7 @@ public sealed class SendEmailRequestValidator : AbstractValidator<SendEmailReque
 
         RuleFor(x => x.Body)
             .NotEmpty().WithMessage("Body is required")
-            .Must(body => System.Text.Encoding.UTF8.GetByteCount(body) <= MaxBodyLengthBytes)
+            .Must(body => body is null || System.Text.Encoding.UTF8.GetByteCount(body) <= MaxBodyLengthBytes)
             .WithMessage("Body must not exceed 10 MB");
 
         RuleForEach(x => x.CcRecipients)

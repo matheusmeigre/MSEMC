@@ -1,0 +1,55 @@
+services:
+  msemc-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: msemc-api
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Smtp__Host=smtp.gmail.com
+      - Smtp__Port=587
+      - Smtp__Username=${SMTP_USERNAME}
+      - Smtp__Password=${SMTP_PASSWORD}
+      - Smtp__SenderEmail=${SMTP_SENDER_EMAIL}
+      - Smtp__EnableSsl=true
+      - ApiKey__Key=${API_KEY:-dev-api-key-change-in-production}
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=guest
+      - RabbitMq__Password=guest
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - msemc-network
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: msemc-rabbitmq
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # Management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - msemc-network
+    restart: unless-stopped
+
+volumes:
+  rabbitmq-data:
+    driver: local
+
+networks:
+  msemc-network:
+    driver: bridge

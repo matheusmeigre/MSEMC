@@ -1,9 +1,18 @@
+using System.Threading.RateLimiting;
 using FluentValidation;
+using MassTransit;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.OpenApi.Models;
 using MSEMC.Abstractions;
 using MSEMC.Configuration;
+using MSEMC.Endpoints;
 using MSEMC.Infrastructure.Email;
 using MSEMC.Infrastructure.Resilience;
+using MSEMC.Messaging.Consumers;
+using MSEMC.Messaging.Publishers;
 using MSEMC.Middleware;
+using MSEMC.Security;
 using Serilog;
 
 // ── Bootstrap Serilog (early init for startup error capture) ──
@@ -30,11 +39,80 @@ try
         .ValidateDataAnnotations()
         .ValidateOnStart();
 
+    builder.Services.AddOptions<ApiKeyOptions>()
+        .BindConfiguration(ApiKeyOptions.SectionName)
+        .ValidateDataAnnotations()
+        .ValidateOnStart();
+
+    builder.Services.AddOptions<RateLimitOptions>()
+        .BindConfiguration(RateLimitOptions.SectionName)
+        .ValidateDataAnnotations();
+
+    builder.Services.AddOptions<RabbitMqOptions>()
+        .BindConfiguration(RabbitMqOptions.SectionName)
+        .ValidateDataAnnotations();
+
+    // ── Authentication: API Key ──
+    builder.Services.AddAuthentication(ApiKeyAuthenticationHandler.SchemeName)
+        .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
+            ApiKeyAuthenticationHandler.SchemeName, null);
+    builder.Services.AddAuthorization();
+
+    // ── Rate Limiting: Fixed Window ──
+    var rateLimitConfig = builder.Configuration
+        .GetSection(RateLimitOptions.SectionName)
+        .Get<RateLimitOptions>() ?? new RateLimitOptions { PermitLimit = 100, WindowSeconds = 60 };
+
+    builder.Services.AddRateLimiter(options =>
+    {
+        options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        options.AddFixedWindowLimiter("messages", limiter =>
+        {
+            limiter.PermitLimit = rateLimitConfig.PermitLimit;
+            limiter.Window = TimeSpan.FromSeconds(rateLimitConfig.WindowSeconds);
+            limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            limiter.QueueLimit = 5;
+        });
+    });
+
     // ── Resilience: Polly v8 pipelines ──
     builder.Services.AddSmtpResilience();
 
+    // ── Messaging: MassTransit + RabbitMQ ──
+    var rabbitConfig = builder.Configuration
+        .GetSection(RabbitMqOptions.SectionName)
+        .Get<RabbitMqOptions>();
+
+    builder.Services.AddMassTransit(bus =>
+    {
+        bus.AddConsumer<SendEmailConsumer>();
+
+        if (rabbitConfig is { Host: not null })
+        {
+            bus.UsingRabbitMq((context, cfg) =>
+            {
+                cfg.Host(rabbitConfig.Host, rabbitConfig.Port, "/", h =>
+                {
+                    h.Username(rabbitConfig.Username);
+                    h.Password(rabbitConfig.Password);
+                });
+
+                cfg.ConfigureEndpoints(context);
+            });
+        }
+        else
+        {
+            // Fallback: InMemory transport for development without Docker
+            bus.UsingInMemory((context, cfg) =>
+            {
+                cfg.ConfigureEndpoints(context);
+            });
+        }
+    });
+
     // ── Dependency Injection ──
     builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
+    builder.Services.AddScoped<IEmailQueuePublisher, MassTransitEmailPublisher>();
 
     // ── Validation: FluentValidation auto-discovery ──
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -43,10 +121,41 @@ try
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
 
-    // ── API: Controllers + Swagger ──
-    builder.Services.AddControllers();
+    // ── API: Swagger with API Key support ──
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    builder.Services.AddSwaggerGen(options =>
+    {
+        options.SwaggerDoc("v1", new OpenApiInfo
+        {
+            Title = "MSEMC — Message Service API",
+            Version = "v1",
+            Description = "Microserviço para Envio de Mensagens aos Clientes"
+        });
+
+        options.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
+        {
+            Description = "API Key authentication via X-API-Key header",
+            Name = "X-API-Key",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = "ApiKey"
+        });
+
+        options.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecurityScheme
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "ApiKey"
+                    }
+                },
+                Array.Empty<string>()
+            }
+        });
+    });
 
     var app = builder.Build();
 
@@ -61,8 +170,12 @@ try
     }
 
     app.UseHttpsRedirection();
+    app.UseAuthentication();
     app.UseAuthorization();
-    app.MapControllers();
+    app.UseRateLimiter();
+
+    // ── Endpoints ──
+    app.MapMessageEndpoints();
 
     Log.Information("MSEMC starting on {Environment}", app.Environment.EnvironmentName);
 
