@@ -1,5 +1,28 @@
-.vs/*
+# ── Build artifacts ──
+bin/
+obj/
+out/
+publish/
+
+# ── IDE ──
+.vs/
+.vscode/
+*.user
+*.suo
+*.csproj.user
+
+# ── Secrets & environment ──
 .env
-bin/*
-obj/*
-appsettings.json
+appsettings.*.local.json
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+
+# ── Docker ──
+docker-compose.override.yml
+
+# ── Test results ──
+TestResults/
+coverage/
+*.trx

@@ -2,13 +2,17 @@ using System.Threading.RateLimiting;
 using FluentValidation;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.OpenApi.Models;
 using MSEMC.Abstractions;
 using MSEMC.Configuration;
 using MSEMC.Endpoints;
 using MSEMC.Infrastructure.Email;
+using MSEMC.Infrastructure.HealthChecks;
 using MSEMC.Infrastructure.Resilience;
+using MSEMC.Infrastructure.Telemetry;
 using MSEMC.Messaging.Consumers;
 using MSEMC.Messaging.Publishers;
 using MSEMC.Middleware;
@@ -121,6 +125,15 @@ try
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
 
+    // ── Health Checks ──
+    builder.Services.AddHealthChecks()
+        .AddCheck<SmtpHealthCheck>("smtp",
+            failureStatus: HealthStatus.Degraded,
+            tags: ["ready", "smtp"]);
+
+    // ── OpenTelemetry: Custom Metrics ──
+    builder.Services.AddSingleton(MsemcTelemetry.ActivitySource);
+
     // ── API: Swagger with API Key support ──
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
@@ -177,6 +190,18 @@ try
     // ── Endpoints ──
     app.MapMessageEndpoints();
 
+    // ── Health Checks Endpoints ──
+    app.MapHealthChecks("/health", new HealthCheckOptions
+    {
+        Predicate = _ => false // Liveness: always 200 if app is running
+    }).AllowAnonymous();
+
+    app.MapHealthChecks("/health/ready", new HealthCheckOptions
+    {
+        Predicate = check => check.Tags.Contains("ready"),
+        ResponseWriter = WriteHealthCheckResponse
+    }).AllowAnonymous();
+
     Log.Information("MSEMC starting on {Environment}", app.Environment.EnvironmentName);
 
     app.Run();
@@ -188,4 +213,26 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+// ── Health Check Response Writer ──
+static Task WriteHealthCheckResponse(HttpContext context, HealthReport report)
+{
+    context.Response.ContentType = "application/json";
+
+    var response = new
+    {
+        status = report.Status.ToString(),
+        duration = report.TotalDuration.TotalMilliseconds,
+        checks = report.Entries.Select(e => new
+        {
+            name = e.Key,
+            status = e.Value.Status.ToString(),
+            description = e.Value.Description,
+            duration = e.Value.Duration.TotalMilliseconds,
+            data = e.Value.Data
+        })
+    };
+
+    return context.Response.WriteAsJsonAsync(response);
 }

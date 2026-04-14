@@ -1,6 +1,69 @@
-@MSEMC_HostAddress = http://localhost:5116
+@baseUrl = http://localhost:8080
+@apiKey = dev-api-key-change-in-production
 
-GET {{MSEMC_HostAddress}}/weatherforecast/
+### ── Health Check ──
+GET {{baseUrl}}/health
 Accept: application/json
+
+###
+
+### ── Health Check (Detailed) ──
+GET {{baseUrl}}/health/ready
+Accept: application/json
+
+###
+
+### ── Send Email (via queue) ──
+POST {{baseUrl}}/api/messages
+Content-Type: application/json
+X-API-Key: {{apiKey}}
+
+{
+  "recipient": "user@example.com",
+  "subject": "Test from MSEMC",
+  "body": "<h1>Hello!</h1><p>This is a test email from MSEMC.</p>",
+  "isHtml": true
+}
+
+###
+
+### ── Send Email with CC/BCC ──
+POST {{baseUrl}}/api/messages
+Content-Type: application/json
+X-API-Key: {{apiKey}}
+
+{
+  "recipient": "user@example.com",
+  "subject": "Test with CC and BCC",
+  "body": "Plain text email body",
+  "isHtml": false,
+  "ccRecipients": ["cc1@example.com"],
+  "bccRecipients": ["bcc1@example.com"]
+}
+
+###
+
+### ── Send Email (missing API Key — should return 401) ──
+POST {{baseUrl}}/api/messages
+Content-Type: application/json
+
+{
+  "recipient": "user@example.com",
+  "subject": "Unauthorized test",
+  "body": "This should fail with 401"
+}
+
+###
+
+### ── Send Email (invalid body — should return 400) ──
+POST {{baseUrl}}/api/messages
+Content-Type: application/json
+X-API-Key: {{apiKey}}
+
+{
+  "recipient": "not-a-valid-email",
+  "subject": "",
+  "body": ""
+}
 
 ###
