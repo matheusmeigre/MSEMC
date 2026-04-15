@@ -10,7 +10,7 @@ public sealed class RabbitMqOptions
     public const string SectionName = "RabbitMq";
 
     [Required(ErrorMessage = "RabbitMQ Host is required")]
-    public required string Host { get; init; }
+    public string? Host { get; init; }
 
     public string Username { get; init; } = "guest";
 

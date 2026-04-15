@@ -91,7 +91,7 @@ try
     {
         bus.AddConsumer<SendEmailConsumer>();
 
-        if (rabbitConfig is { Host: not null })
+        if (rabbitConfig is not null && !string.IsNullOrWhiteSpace(rabbitConfig.Host))
         {
             bus.UsingRabbitMq((context, cfg) =>
             {
