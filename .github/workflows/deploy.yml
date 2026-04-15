@@ -9,46 +9,49 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
-    #Variáveis seguras (vindas do GitHub Secrets)
-    env:
-      EmailSettings__Password: ${{ secrets.SENHA_DO_APP }}
-      EmailSettings__Email: ${{ secrets.EMAIL_APP }}
-
     steps:
-      #Baixar código
       - name: Checkout
         uses: actions/checkout@v4
 
-      #Verificar vulnerabilidades (dependências)
-      - name: Security Audit
-        run: dotnet list package --vulnerable || true
-
-      #Setup do .NET
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      #Restore (dependências)
+      # Cache NuGet para acelerar o pipeline
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      # Auditoria de vulnerabilidades nas dependências
+      - name: Security Audit
+        run: dotnet list package --vulnerable || true
+
       - name: Restore dependencies
         run: dotnet restore
 
-      #Build com validação
+      # Analyzers habilitados direto no build, sem step separado
       - name: Build
-        run: dotnet build --no-restore --configuration Release
+        run: dotnet build --no-restore --configuration Release /p:EnableNETAnalyzers=true
 
-      #Testes (se existirem)
       - name: Run Tests
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test --no-restore --no-build --configuration Release --verbosity normal
 
-      #Análise de código (opcional mas recomendado)
-      - name: Code Analysis
-        run: dotnet build /p:EnableNETAnalyzers=true
-
-      #Publicação
       - name: Publish
-        run: dotnet publish -c Release -o out
+        run: dotnet publish --no-restore --no-build --configuration Release -o out
 
-      #Deploy (exemplo genérico)
-      - name: Deploy (simulado)
-        run: echo "Aqui você conecta com Render, Railway ou Azure"
+      # Deploy — substitua pelo step real (Render, Railway, Azure, etc.)
+      - name: Deploy
+        env:
+          Smtp__Username: ${{ secrets.SMTP_USERNAME }}
+          Smtp__Password: ${{ secrets.SMTP_PASSWORD }}
+          Smtp__SenderEmail: ${{ secrets.SMTP_SENDER_EMAIL }}
+          ApiKey__Key: ${{ secrets.API_KEY }}
+          RabbitMq__Host: ${{ secrets.RABBITMQ_HOST }}
+          RabbitMq__Username: ${{ secrets.RABBITMQ_USERNAME }}
+          RabbitMq__Password: ${{ secrets.RABBITMQ_PASSWORD }}
+        run: echo "Conecte aqui com Render, Railway ou Azure"
