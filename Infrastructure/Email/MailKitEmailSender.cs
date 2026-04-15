@@ -10,8 +10,8 @@ using MSEMC.Domain.Results;
 namespace MSEMC.Infrastructure.Email;
 
 /// <summary>
-/// Production-grade email sender using MailKit (replaces obsolete System.Net.Mail.SmtpClient).
-/// Features: full async/await, proper TLS, CancellationToken propagation, structured logging.
+/// Implementação de envio de e-mail em nível de produção usando MailKit (substitui o obsoleto System.Net.Mail.SmtpClient).
+/// Recursos: async/await completo, TLS adequado, propagação de CancellationToken e logs estruturados.
 /// </summary>
 public sealed class MailKitEmailSender(
     IOptions<SmtpOptions> options,

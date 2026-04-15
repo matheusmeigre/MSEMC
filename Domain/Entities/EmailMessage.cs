@@ -3,8 +3,8 @@ using MSEMC.Domain.Enums;
 namespace MSEMC.Domain.Entities;
 
 /// <summary>
-/// Rich domain entity representing an email message throughout its lifecycle.
-/// Immutable record with controlled state transitions via dedicated methods.
+/// Entidade de domínio rica que representa uma mensagem de e-mail ao longo do seu ciclo de vida.
+/// Record imutável com transições de estado controladas via métodos dedicados.
 /// </summary>
 public sealed record EmailMessage
 {
@@ -31,7 +31,7 @@ public sealed record EmailMessage
     public string? ErrorMessage { get; private set; }
 
     /// <summary>
-    /// Factory method — the only way to create a valid EmailMessage.
+    /// Método factory — única forma de criar um EmailMessage válido.
     /// </summary>
     public static EmailMessage Create(
         string recipient,
@@ -50,7 +50,7 @@ public sealed record EmailMessage
             BccRecipients = bccRecipients ?? []
         };
 
-    /// <summary>Transitions the message to Sending status.</summary>
+    /// <summary>Transiciona a mensagem para o status Sending.</summary>
     public void MarkAsSending()
     {
         if (Status is not (EmailStatus.Pending or EmailStatus.Queued or EmailStatus.Retrying))
@@ -60,7 +60,7 @@ public sealed record EmailMessage
         Status = EmailStatus.Sending;
     }
 
-    /// <summary>Transitions the message to Sent status with a timestamp.</summary>
+    /// <summary>Transiciona a mensagem para o status Sent com registro de data/hora.</summary>
     public void MarkAsSent()
     {
         if (Status is not EmailStatus.Sending)
@@ -72,7 +72,7 @@ public sealed record EmailMessage
         ErrorMessage = null;
     }
 
-    /// <summary>Transitions the message to Failed status with an error description.</summary>
+    /// <summary>Transiciona a mensagem para o status Failed com uma descrição do erro.</summary>
     public void MarkAsFailed(string error)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(error);
@@ -80,7 +80,7 @@ public sealed record EmailMessage
         ErrorMessage = error;
     }
 
-    /// <summary>Transitions the message to Queued status (accepted for async processing).</summary>
+    /// <summary>Transiciona a mensagem para o status Queued (aceita para processamento assíncrono).</summary>
     public void MarkAsQueued()
     {
         if (Status is not EmailStatus.Pending)

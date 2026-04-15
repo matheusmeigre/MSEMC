@@ -7,8 +7,8 @@ using MSEMC.Messaging.Events;
 namespace MSEMC.Messaging.Consumers;
 
 /// <summary>
-/// MassTransit consumer that processes SendEmailCommand messages from the queue.
-/// Delegates actual sending to IEmailSender and publishes outcome events.
+/// Consumer MassTransit que processa mensagens SendEmailCommand da fila.
+/// Delega o envio real ao IEmailSender e publica eventos de resultado.
 /// </summary>
 public sealed class SendEmailConsumer(
     IEmailSender emailSender,

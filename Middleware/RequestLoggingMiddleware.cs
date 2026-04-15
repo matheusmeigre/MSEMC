@@ -3,9 +3,9 @@ using System.Diagnostics;
 namespace MSEMC.Middleware;
 
 /// <summary>
-/// Middleware that enriches each request with a correlation ID and logs
-/// request/response lifecycle with timing information.
-/// Adds X-Correlation-Id header to responses for distributed tracing.
+/// Middleware que enriquece cada requisição com um correlation ID e registra
+/// o ciclo de vida da requisição/resposta com informações de tempo.
+/// Adiciona o header X-Correlation-Id nas respostas para rastreamento distribuído.
 /// </summary>
 public sealed class RequestLoggingMiddleware(
     RequestDelegate next,

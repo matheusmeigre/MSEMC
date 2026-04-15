@@ -3,17 +3,17 @@ using System.ComponentModel.DataAnnotations;
 namespace MSEMC.Configuration;
 
 /// <summary>
-/// Strongly-typed options for Rate Limiting configuration.
+/// Opções fortemente tipadas para configuração de Rate Limiting.
 /// </summary>
 public sealed class RateLimitOptions
 {
     public const string SectionName = "RateLimiting";
 
-    /// <summary>Maximum number of requests allowed in the time window.</summary>
+    /// <summary>Número máximo de requisições permitidas na janela de tempo.</summary>
     [Range(1, 10000)]
     public int PermitLimit { get; init; } = 100;
 
-    /// <summary>Duration of the rate limiting window in seconds.</summary>
+    /// <summary>Duração da janela de rate limiting em segundos.</summary>
     [Range(1, 3600)]
     public int WindowSeconds { get; init; } = 60;
 }

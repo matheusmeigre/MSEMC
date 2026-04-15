@@ -7,8 +7,8 @@ using MSEMC.Domain.Entities;
 namespace MSEMC.Endpoints;
 
 /// <summary>
-/// Minimal API endpoints for message operations.
-/// Replaces the legacy EmailController with a more idiomatic .NET 8 approach.
+/// Endpoints Minimal API para operações de mensagens.
+/// Substitui o EmailController legado por uma abordagem mais idiomática do .NET 8.
 /// </summary>
 public static class MessageEndpoints
 {

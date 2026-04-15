@@ -1,7 +1,7 @@
 namespace MSEMC.Messaging.Events;
 
 /// <summary>
-/// Domain event published when email delivery fails after all retry attempts.
+/// Evento de domínio publicado quando a entrega do e-mail falha após todas as tentativas de retry.
 /// </summary>
 public sealed record EmailFailedEvent(
     Guid MessageId,

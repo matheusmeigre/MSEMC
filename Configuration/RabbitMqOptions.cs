@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace MSEMC.Configuration;
 
 /// <summary>
-/// Strongly-typed options for RabbitMQ connection.
+/// Opções fortemente tipadas para conexão com o RabbitMQ.
 /// </summary>
 public sealed class RabbitMqOptions
 {

@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace MSEMC.Middleware;
 
 /// <summary>
-/// Global exception handler implementing IExceptionHandler (.NET 8).
-/// Converts unhandled exceptions into RFC 7807 Problem Details responses.
-/// Logs structured error information without exposing internals to clients.
+/// Handler global de exceções implementando IExceptionHandler (.NET 8).
+/// Converte exceções não tratadas em respostas RFC 7807 Problem Details.
+/// Registra informações de erro estruturadas sem expor detalhes internos aos clientes.
 /// </summary>
 public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
@@ -63,7 +63,7 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
         };
 
     /// <summary>
-    /// Returns exception details only in Development; generic message in production.
+    /// Retorna detalhes da exceção apenas em Development; mensagem genérica em produção.
     /// </summary>
     private static string GetSafeDetail(Exception exception, HttpContext context) =>
         context.RequestServices.GetRequiredService<IHostEnvironment>().IsDevelopment()

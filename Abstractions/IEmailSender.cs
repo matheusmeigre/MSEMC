@@ -4,18 +4,18 @@ using MSEMC.Domain.Results;
 namespace MSEMC.Abstractions;
 
 /// <summary>
-/// Abstraction for sending email messages.
-/// Enables Dependency Inversion — controllers depend on this interface,
-/// not on concrete implementations (SmtpClient, MailKit, etc.).
+/// Abstração para envio de mensagens de e-mail.
+/// Aplica Inversão de Dependência — os controllers dependem desta interface,
+/// não de implementações concretas (SmtpClient, MailKit, etc.).
 /// </summary>
 public interface IEmailSender
 {
     /// <summary>
-    /// Sends an email message asynchronously.
-    /// Returns a Result indicating success or failure without throwing exceptions.
+    /// Envia uma mensagem de e-mail de forma assíncrona.
+    /// Retorna um Result indicando sucesso ou falha sem lançar exceções.
     /// </summary>
-    /// <param name="message">The email message to send.</param>
-    /// <param name="cancellationToken">Token to cancel the operation.</param>
-    /// <returns>A Result containing the updated EmailMessage on success, or an error on failure.</returns>
+    /// <param name="message">A mensagem de e-mail a ser enviada.</param>
+    /// <param name="cancellationToken">Token para cancelar a operação.</param>
+    /// <returns>Um Result contendo o EmailMessage atualizado em caso de sucesso, ou um erro em caso de falha.</returns>
     Task<Result<EmailMessage>> SendAsync(EmailMessage message, CancellationToken cancellationToken = default);
 }

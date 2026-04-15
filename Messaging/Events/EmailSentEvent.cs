@@ -1,7 +1,7 @@
 namespace MSEMC.Messaging.Events;
 
 /// <summary>
-/// Domain event published when an email is successfully delivered.
+/// Evento de domínio publicado quando um e-mail é entregue com sucesso.
 /// </summary>
 public sealed record EmailSentEvent(
     Guid MessageId,

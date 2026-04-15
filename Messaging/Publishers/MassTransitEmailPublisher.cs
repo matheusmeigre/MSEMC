@@ -6,8 +6,8 @@ using MSEMC.Messaging.Commands;
 namespace MSEMC.Messaging.Publishers;
 
 /// <summary>
-/// Publishes email messages to the message queue via MassTransit.
-/// Implements <see cref="IEmailQueuePublisher"/> for dependency inversion.
+/// Publica mensagens de e-mail na fila via MassTransit.
+/// Implementa <see cref="IEmailQueuePublisher"/> para inversão de dependência.
 /// </summary>
 public sealed class MassTransitEmailPublisher(
     IPublishEndpoint publishEndpoint,
