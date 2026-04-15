@@ -1,0 +1,6 @@
+**/obj/
+**/bin/
+**/.git/
+**/.vs/
+.env
+appsettings.Development.json

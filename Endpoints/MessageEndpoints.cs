@@ -15,14 +15,14 @@ public static class MessageEndpoints
     public static void MapMessageEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/messages")
-            .WithTags("Messages")
+            .WithTags("Mensagens")
             .RequireAuthorization()
             .RequireRateLimiting("messages");
 
         group.MapPost("/", SendMessage)
             .WithName("SendMessage")
-            .WithSummary("Queue an email message for delivery")
-            .WithDescription("Accepts an email and enqueues it for asynchronous delivery via the message broker.")
+            .WithSummary("Enfileirar uma mensagem de e-mail para envio")
+            .WithDescription("Recebe um e-mail e o enfileira para entrega assíncrona via broker de mensagens.")
             .Produces<SendEmailResponse>(StatusCodes.Status202Accepted)
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status401Unauthorized)

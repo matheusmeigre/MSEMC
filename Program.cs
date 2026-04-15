@@ -140,14 +140,14 @@ try
     {
         options.SwaggerDoc("v1", new OpenApiInfo
         {
-            Title = "MSEMC — Message Service API",
+            Title = "MSEMC — API de Envio de Mensagens",
             Version = "v1",
-            Description = "Microserviço para Envio de Mensagens aos Clientes"
+            Description = "Microserviço para Envio de Mensagens aos Clientes. Autentique-se com sua API Key antes de utilizar os endpoints."
         });
 
         options.AddSecurityDefinition("ApiKey", new OpenApiSecurityScheme
         {
-            Description = "API Key authentication via X-API-Key header",
+            Description = "Autenticação via API Key. Informe sua chave no campo abaixo.",
             Name = "X-API-Key",
             In = ParameterLocation.Header,
             Type = SecuritySchemeType.ApiKey,
