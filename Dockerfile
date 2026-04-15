@@ -8,7 +8,7 @@ RUN dotnet restore
 
 # Copy remaining source and publish
 COPY . .
-RUN dotnet publish -c Release -o /app --no-restore
+RUN dotnet publish MSEMC.csproj -c Release -o /app --no-restore
 
 # ── Stage 2: Runtime ──
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
