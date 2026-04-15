@@ -3,15 +3,15 @@ using MSEMC.Domain.Entities;
 namespace MSEMC.Abstractions;
 
 /// <summary>
-/// Abstraction for publishing email messages to a message queue for async processing.
-/// Decouples the API layer from the actual message broker (RabbitMQ, InMemory, etc.).
+/// Abstração para publicar mensagens de e-mail em uma fila para processamento assíncrono.
+/// Desacopla a camada de API do broker de mensagens real (RabbitMQ, InMemory, etc.).
 /// </summary>
 public interface IEmailQueuePublisher
 {
     /// <summary>
-    /// Publishes an email message to the queue for asynchronous delivery.
+    /// Publica uma mensagem de e-mail na fila para entrega assíncrona.
     /// </summary>
-    /// <param name="message">The email message to enqueue.</param>
-    /// <param name="cancellationToken">Token to cancel the operation.</param>
+    /// <param name="message">A mensagem de e-mail a ser enfileirada.</param>
+    /// <param name="cancellationToken">Token para cancelar a operação.</param>
     Task PublishAsync(EmailMessage message, CancellationToken cancellationToken = default);
 }

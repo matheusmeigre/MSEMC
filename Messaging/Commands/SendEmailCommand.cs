@@ -1,8 +1,8 @@
 namespace MSEMC.Messaging.Commands;
 
 /// <summary>
-/// MassTransit command to send an email asynchronously via the message queue.
-/// Published by the API, consumed by the SendEmailConsumer.
+/// Comando MassTransit para envio assíncrono de e-mail via fila de mensagens.
+/// Publicado pela API e consumido pelo SendEmailConsumer.
 /// </summary>
 public sealed record SendEmailCommand(
     Guid MessageId,

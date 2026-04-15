@@ -4,8 +4,8 @@ using MSEMC.Contracts.Requests;
 namespace MSEMC.Validators;
 
 /// <summary>
-/// Validates SendEmailRequest using FluentValidation rules.
-/// Enforces RFC 2822 constraints and business rules.
+/// Valida o SendEmailRequest usando regras do FluentValidation.
+/// Aplica restrições da RFC 2822 e regras de negócio.
 /// </summary>
 public sealed class SendEmailRequestValidator : AbstractValidator<SendEmailRequest>
 {

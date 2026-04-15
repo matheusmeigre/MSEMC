@@ -6,8 +6,8 @@ using Microsoft.Extensions.Options;
 namespace MSEMC.Security;
 
 /// <summary>
-/// Custom authentication handler that validates requests via API Key in HTTP header.
-/// Lightweight alternative to JWT for service-to-service communication.
+/// Handler de autenticação customizado que valida requisições via API Key no header HTTP.
+/// Alternativa leve ao JWT para comunicação service-to-service.
 /// </summary>
 public sealed class ApiKeyAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,

@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations;
 namespace MSEMC.Configuration;
 
 /// <summary>
-/// Strongly-typed options for SMTP configuration.
-/// Validated at startup via DataAnnotations.
+/// Opções fortemente tipadas para configuração SMTP.
+/// Validadas na inicialização via DataAnnotations.
 /// </summary>
 public sealed class SmtpOptions
 {

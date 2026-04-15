@@ -8,16 +8,16 @@ using Polly.Timeout;
 namespace MSEMC.Infrastructure.Resilience;
 
 /// <summary>
-/// Configures resilience pipelines for the MSEMC service.
-/// Uses Polly v8 Resilience Pipelines with retry, circuit breaker, and timeout strategies.
+/// Configura pipelines de resiliência para o serviço MSEMC.
+/// Utiliza Polly v8 Resilience Pipelines com estratégias de retry, circuit breaker e timeout.
 /// </summary>
 public static class ResiliencePolicies
 {
     public const string SmtpPipelineName = "smtp-resilience";
 
     /// <summary>
-    /// Registers the SMTP resilience pipeline in the DI container.
-    /// Pipeline order: Timeout (outer) → Retry → Circuit Breaker → Timeout (inner per attempt).
+    /// Registra o pipeline de resiliência SMTP no contêiner de DI.
+    /// Ordem do pipeline: Timeout (externo) → Retry → Circuit Breaker → Timeout (interno por tentativa).
     /// </summary>
     public static IServiceCollection AddSmtpResilience(this IServiceCollection services)
     {

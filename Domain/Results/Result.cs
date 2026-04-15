@@ -1,8 +1,8 @@
 namespace MSEMC.Domain.Results;
 
 /// <summary>
-/// Represents the outcome of an operation that can either succeed with a value
-/// or fail with an error message. Used instead of exceptions for business logic flow.
+/// Representa o resultado de uma operação que pode ter sucesso com um valor
+/// ou falhar com uma mensagem de erro. Usado no lugar de exceções para o fluxo de lógica de negócio.
 /// </summary>
 public readonly record struct Result<T>
 {
@@ -24,14 +24,14 @@ public readonly record struct Result<T>
         Value = default;
     }
 
-    /// <summary>Creates a successful result containing the specified value.</summary>
+    /// <summary>Cria um resultado de sucesso contendo o valor especificado.</summary>
     public static Result<T> Ok(T value) => new(value);
 
-    /// <summary>Creates a failed result with the specified error message.</summary>
+    /// <summary>Cria um resultado de falha com a mensagem de erro especificada.</summary>
     public static Result<T> Fail(string error) => new(error);
 
     /// <summary>
-    /// Matches the result to one of two functions depending on success or failure.
+    /// Executa uma das duas funções dependendo do sucesso ou falha do resultado.
     /// </summary>
     public TResult Match<TResult>(Func<T, TResult> onSuccess, Func<string, TResult> onFailure) =>
         IsSuccess ? onSuccess(Value!) : onFailure(Error!);

@@ -7,8 +7,8 @@ using MSEMC.Configuration;
 namespace MSEMC.Infrastructure.HealthChecks;
 
 /// <summary>
-/// Health check that verifies SMTP server connectivity.
-/// Tests connection and authentication without sending any email.
+/// Health check que verifica a conectividade com o servidor SMTP.
+/// Testa conexão e autenticação sem enviar nenhum e-mail.
 /// </summary>
 public sealed class SmtpHealthCheck(
     IOptions<SmtpOptions> options,
