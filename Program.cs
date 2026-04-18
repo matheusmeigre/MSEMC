@@ -9,7 +9,7 @@ using Microsoft.OpenApi.Models;
 using MSEMC.Abstractions;
 using MSEMC.Configuration;
 using MSEMC.Endpoints;
-using Serilog.Sinks.GrafanaLoki;
+using Serilog.Sinks.Grafana.Loki;
 using MSEMC.Infrastructure.Email;
 using MSEMC.Infrastructure.HealthChecks;
 using MSEMC.Infrastructure.Resilience;
@@ -21,6 +21,8 @@ using MSEMC.Security;
 using Serilog;
 
 // ── Bootstrap Serilog (early init for startup error capture) ──
+Serilog.Debugging.SelfLog.Enable(msg => Console.Error.WriteLine($"[SERILOG INTERNAL] {msg}"));
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
@@ -40,23 +42,25 @@ try
             .ReadFrom.Configuration(context.Configuration)
             .ReadFrom.Services(services)
             .Enrich.FromLogContext()
-            .Enrich.WithProperty("app", lokiOptions?.AppLabel ?? "msemc")
             .WriteTo.Console(
                 outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
 
         if (lokiOptions is { Enabled: true })
         {
             serilogConfig.WriteTo.GrafanaLoki(
-                url: lokiOptions.Uri,
-                credentials: new GrafanaLokiCredentials
+                uri: lokiOptions.Uri,
+                labels:
+                [
+                    new LokiLabel { Key = "app", Value = lokiOptions.AppLabel },
+                    new LokiLabel { Key = "environment", Value = lokiOptions.EnvironmentLabel }
+                ],
+                // Apenas label "level" é promovida automaticamente pelo sink
+                // Nenhuma outra propriedade do LogEvent vira label Loki
+                propertiesAsLabels: [],
+                credentials: new LokiCredentials
                 {
-                    User = lokiOptions.Username,
+                    Login = lokiOptions.Username,
                     Password = lokiOptions.Password
-                },
-                labels: new Dictionary<string, string>
-                {
-                    { "app", lokiOptions.AppLabel },
-                    { "environment", lokiOptions.EnvironmentLabel }
                 });
         }
     });
@@ -123,7 +127,7 @@ try
         {
             bus.UsingRabbitMq((context, cfg) =>
             {
-                cfg.Host(rabbitConfig.Host, rabbitConfig.Port, "/", h =>
+                cfg.Host(rabbitConfig.Host, rabbitConfig.Port, rabbitConfig.Username, h =>
                 {
                     h.Username(rabbitConfig.Username);
                     h.Password(rabbitConfig.Password);
