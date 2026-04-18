@@ -6,6 +6,8 @@ using MSEMC.Abstractions;
 using MSEMC.Configuration;
 using MSEMC.Domain.Entities;
 using MSEMC.Domain.Results;
+using MSEMC.Infrastructure.Resilience;
+using Polly.Registry;
 
 namespace MSEMC.Infrastructure.Email;
 
@@ -15,6 +17,7 @@ namespace MSEMC.Infrastructure.Email;
 /// </summary>
 public sealed class MailKitEmailSender(
     IOptions<SmtpOptions> options,
+    ResiliencePipelineProvider<string> pipelineProvider,
     ILogger<MailKitEmailSender> logger) : IEmailSender
 {
     private readonly SmtpOptions _options = options.Value;
@@ -32,22 +35,22 @@ public sealed class MailKitEmailSender(
             message.MarkAsSending();
 
             var mimeMessage = BuildMimeMessage(message);
+            var pipeline = pipelineProvider.GetPipeline(ResiliencePolicies.SmtpPipelineName);
 
-            using var client = new SmtpClient();
+            await pipeline.ExecuteAsync(async ct =>
+            {
+                using var client = new SmtpClient();
 
-            await client.ConnectAsync(
-                _options.Host,
-                _options.Port,
-                _options.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None,
-                cancellationToken);
+                await client.ConnectAsync(
+                    _options.Host,
+                    _options.Port,
+                    _options.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None,
+                    ct);
 
-            await client.AuthenticateAsync(
-                _options.Username,
-                _options.Password,
-                cancellationToken);
-
-            await client.SendAsync(mimeMessage, cancellationToken);
-            await client.DisconnectAsync(quit: true, cancellationToken);
+                await client.AuthenticateAsync(_options.Username, _options.Password, ct);
+                await client.SendAsync(mimeMessage, ct);
+                await client.DisconnectAsync(quit: true, ct);
+            }, cancellationToken);
 
             message.MarkAsSent();
 
