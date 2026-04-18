@@ -41,7 +41,7 @@ public sealed class SmtpHealthCheck(
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "SMTP health check failed for {Host}:{Port}", _options.Host, _options.Port);
+            logger.LogWarning(ex, "Health check SMTP falhou para {Host}:{Port}", _options.Host, _options.Port);
 
             return HealthCheckResult.Unhealthy(
                 description: $"SMTP connection failed: {ex.Message}",

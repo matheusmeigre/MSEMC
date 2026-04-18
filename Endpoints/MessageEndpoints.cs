@@ -56,7 +56,7 @@ public static class MessageEndpoints
             bccRecipients: request.BccRecipients);
 
         logger.LogInformation(
-            "Accepted email request for {Recipient} (MessageId: {MessageId})",
+            "Solicitação de e-mail aceita para {Recipient} (MessageId: {MessageId})",
             request.Recipient, message.Id);
 
         await publisher.PublishAsync(message, cancellationToken);

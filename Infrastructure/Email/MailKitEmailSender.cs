@@ -27,7 +27,7 @@ public sealed class MailKitEmailSender(
         CancellationToken cancellationToken = default)
     {
         logger.LogInformation(
-            "Preparing email to {Recipient} with subject '{Subject}' (MessageId: {MessageId})",
+            "Preparando e-mail para {Recipient} com assunto '{Subject}' (MessageId: {MessageId})",
             message.Recipient, message.Subject, message.Id);
 
         try
@@ -55,7 +55,7 @@ public sealed class MailKitEmailSender(
             message.MarkAsSent();
 
             logger.LogInformation(
-                "Email delivered successfully to {Recipient} (MessageId: {MessageId}, SentAt: {SentAt})",
+                "E-mail entregue com sucesso para {Recipient} (MessageId: {MessageId}, EnviadoEm: {SentAt})",
                 message.Recipient, message.Id, message.SentAt);
 
             return Result<EmailMessage>.Ok(message);
@@ -63,14 +63,14 @@ public sealed class MailKitEmailSender(
         catch (OperationCanceledException)
         {
             logger.LogWarning(
-                "Email sending cancelled for {Recipient} (MessageId: {MessageId})",
+                "Envio de e-mail cancelado para {Recipient} (MessageId: {MessageId})",
                 message.Recipient, message.Id);
             throw;
         }
         catch (AuthenticationException ex)
         {
             logger.LogError(ex,
-                "SMTP authentication failed for {Host}:{Port} (MessageId: {MessageId})",
+                "Falha de autenticação SMTP em {Host}:{Port} (MessageId: {MessageId})",
                 _options.Host, _options.Port, message.Id);
 
             message.MarkAsFailed($"Authentication failed: {ex.Message}");
@@ -79,7 +79,7 @@ public sealed class MailKitEmailSender(
         catch (Exception ex)
         {
             logger.LogError(ex,
-                "Failed to send email to {Recipient} (MessageId: {MessageId})",
+                "Falha ao enviar e-mail para {Recipient} (MessageId: {MessageId})",
                 message.Recipient, message.Id);
 
             message.MarkAsFailed(ex.Message);

@@ -27,7 +27,7 @@ public sealed class BrevoEmailSender(
         CancellationToken cancellationToken = default)
     {
         logger.LogInformation(
-            "Preparing email to {Recipient} with subject '{Subject}' (MessageId: {MessageId})",
+            "Preparando e-mail para {Recipient} com assunto '{Subject}' (MessageId: {MessageId})",
             message.Recipient, message.Subject, message.Id);
 
         try
@@ -61,7 +61,7 @@ public sealed class BrevoEmailSender(
             {
                 var error = await response.Content.ReadAsStringAsync(cancellationToken);
                 logger.LogError(
-                    "Brevo API returned {StatusCode} for {Recipient} (MessageId: {MessageId}): {Error}",
+                    "API Brevo retornou {StatusCode} para {Recipient} (MessageId: {MessageId}): {Error}",
                     (int)response.StatusCode, message.Recipient, message.Id, error);
 
                 message.MarkAsFailed($"Brevo API error {(int)response.StatusCode}: {error}");
@@ -71,7 +71,7 @@ public sealed class BrevoEmailSender(
             message.MarkAsSent();
 
             logger.LogInformation(
-                "Email delivered successfully to {Recipient} (MessageId: {MessageId}, SentAt: {SentAt})",
+                "E-mail entregue com sucesso para {Recipient} (MessageId: {MessageId}, EnviadoEm: {SentAt})",
                 message.Recipient, message.Id, message.SentAt);
 
             return Result<EmailMessage>.Ok(message);
@@ -79,14 +79,14 @@ public sealed class BrevoEmailSender(
         catch (OperationCanceledException)
         {
             logger.LogWarning(
-                "Email sending cancelled for {Recipient} (MessageId: {MessageId})",
+                "Envio de e-mail cancelado para {Recipient} (MessageId: {MessageId})",
                 message.Recipient, message.Id);
             throw;
         }
         catch (Exception ex)
         {
             logger.LogError(ex,
-                "Failed to send email to {Recipient} (MessageId: {MessageId})",
+                "Falha ao enviar e-mail para {Recipient} (MessageId: {MessageId})",
                 message.Recipient, message.Id);
 
             message.MarkAsFailed(ex.Message);

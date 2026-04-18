@@ -31,7 +31,7 @@ public sealed class ApiKeyAuthenticationHandler(
         if (!string.Equals(providedKey, _apiKeyOptions.Key, StringComparison.Ordinal))
         {
             Logger.LogWarning(
-                "Invalid API key provided from {RemoteIp}",
+                "API key inválida fornecida por {RemoteIp}",
                 Context.Connection.RemoteIpAddress);
 
             return Task.FromResult(AuthenticateResult.Fail("Invalid API key"));
