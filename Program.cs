@@ -11,7 +11,6 @@ using MSEMC.Configuration;
 using MSEMC.Endpoints;
 using Serilog.Sinks.Grafana.Loki;
 using MSEMC.Infrastructure.Email;
-using MSEMC.Infrastructure.HealthChecks;
 using MSEMC.Infrastructure.Resilience;
 using MSEMC.Infrastructure.Telemetry;
 using MSEMC.Messaging.Consumers;
@@ -64,6 +63,10 @@ try
     // ── Configuration: Options Pattern with validation at startup ──
     builder.Services.AddOptions<SmtpOptions>()
         .BindConfiguration(SmtpOptions.SectionName)
+        .ValidateDataAnnotations();
+
+    builder.Services.AddOptions<BrevoOptions>()
+        .BindConfiguration(BrevoOptions.SectionName)
         .ValidateDataAnnotations()
         .ValidateOnStart();
 
@@ -142,8 +145,12 @@ try
         }
     });
 
+    // ── Brevo: HTTP email API (SMTP-free) ──
+    builder.Services.AddHttpClient("brevo", client =>
+        client.BaseAddress = new Uri("https://api.brevo.com/v3/"));
+
     // ── Dependency Injection ──
-    builder.Services.AddScoped<IEmailSender, MailKitEmailSender>();
+    builder.Services.AddScoped<IEmailSender, BrevoEmailSender>();
     builder.Services.AddScoped<IEmailQueuePublisher, MassTransitEmailPublisher>();
 
     // ── Validation: FluentValidation auto-discovery ──
@@ -154,10 +161,7 @@ try
     builder.Services.AddProblemDetails();
 
     // ── Health Checks ──
-    builder.Services.AddHealthChecks()
-        .AddCheck<SmtpHealthCheck>("smtp",
-            failureStatus: HealthStatus.Degraded,
-            tags: ["ready", "smtp"]);
+    builder.Services.AddHealthChecks();
 
     // ── OpenTelemetry: Custom Metrics ──
     builder.Services.AddSingleton(MsemcTelemetry.ActivitySource);
