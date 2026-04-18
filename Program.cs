@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using MSEMC.Abstractions;
 using MSEMC.Configuration;
 using MSEMC.Endpoints;
+using Serilog.Sinks.GrafanaLoki;
 using MSEMC.Infrastructure.Email;
 using MSEMC.Infrastructure.HealthChecks;
 using MSEMC.Infrastructure.Resilience;
@@ -30,12 +31,35 @@ try
 
     // ── Serilog: structured logging from configuration ──
     builder.Host.UseSerilog((context, services, configuration) =>
-        configuration
+    {
+        var lokiOptions = context.Configuration
+            .GetSection(LokiOptions.SectionName)
+            .Get<LokiOptions>();
+
+        var serilogConfig = configuration
             .ReadFrom.Configuration(context.Configuration)
             .ReadFrom.Services(services)
             .Enrich.FromLogContext()
+            .Enrich.WithProperty("app", lokiOptions?.AppLabel ?? "msemc")
             .WriteTo.Console(
-                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}"));
+                outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
+
+        if (lokiOptions is { Enabled: true })
+        {
+            serilogConfig.WriteTo.GrafanaLoki(
+                url: lokiOptions.Uri,
+                credentials: new GrafanaLokiCredentials
+                {
+                    User = lokiOptions.Username,
+                    Password = lokiOptions.Password
+                },
+                labels: new Dictionary<string, string>
+                {
+                    { "app", lokiOptions.AppLabel },
+                    { "environment", lokiOptions.EnvironmentLabel }
+                });
+        }
+    });
 
     // ── Configuration: Options Pattern with validation at startup ──
     builder.Services.AddOptions<SmtpOptions>()
@@ -54,6 +78,10 @@ try
 
     builder.Services.AddOptions<RabbitMqOptions>()
         .BindConfiguration(RabbitMqOptions.SectionName)
+        .ValidateDataAnnotations();
+
+    builder.Services.AddOptions<LokiOptions>()
+        .BindConfiguration(LokiOptions.SectionName)
         .ValidateDataAnnotations();
 
     // ── Authentication: API Key ──
