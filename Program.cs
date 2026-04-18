@@ -234,13 +234,13 @@ try
         ResponseWriter = WriteHealthCheckResponse
     }).AllowAnonymous();
 
-    Log.Information("MSEMC starting on {Environment}", app.Environment.EnvironmentName);
+    Log.Information("MSEMC iniciando em {Environment}", app.Environment.EnvironmentName);
 
     app.Run();
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "MSEMC terminated unexpectedly");
+    Log.Fatal(ex, "MSEMC encerrado inesperadamente");
 }
 finally
 {

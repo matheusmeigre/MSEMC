@@ -19,7 +19,7 @@ public sealed class SendEmailConsumer(
         var cmd = context.Message;
 
         logger.LogInformation(
-            "Processing email command for {Recipient} (MessageId: {MessageId})",
+            "Processando comando de e-mail para {Recipient} (MessageId: {MessageId})",
             cmd.Recipient, cmd.MessageId);
 
         var message = EmailMessage.Create(
@@ -35,7 +35,7 @@ public sealed class SendEmailConsumer(
         if (result.IsSuccess)
         {
             logger.LogInformation(
-                "Email delivered to {Recipient} (MessageId: {MessageId})",
+                "E-mail entregue para {Recipient} (MessageId: {MessageId})",
                 cmd.Recipient, cmd.MessageId);
 
             await context.Publish(new EmailSentEvent(
@@ -47,7 +47,7 @@ public sealed class SendEmailConsumer(
         else
         {
             logger.LogWarning(
-                "Email delivery failed for {Recipient} (MessageId: {MessageId}): {Error}",
+                "Falha na entrega de e-mail para {Recipient} (MessageId: {MessageId}): {Error}",
                 cmd.Recipient, cmd.MessageId, result.Error);
 
             await context.Publish(new EmailFailedEvent(

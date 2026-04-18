@@ -16,7 +16,7 @@ public sealed class MassTransitEmailPublisher(
     public async Task PublishAsync(EmailMessage message, CancellationToken cancellationToken = default)
     {
         logger.LogInformation(
-            "Publishing email command to queue for {Recipient} (MessageId: {MessageId})",
+            "Publicando comando de e-mail na fila para {Recipient} (MessageId: {MessageId})",
             message.Recipient, message.Id);
 
         var command = new SendEmailCommand(
@@ -34,7 +34,7 @@ public sealed class MassTransitEmailPublisher(
         message.MarkAsQueued();
 
         logger.LogInformation(
-            "Email command published for {Recipient} (MessageId: {MessageId})",
+            "Comando de e-mail publicado para {Recipient} (MessageId: {MessageId})",
             message.Recipient, message.Id);
     }
 }

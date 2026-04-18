@@ -18,7 +18,7 @@ public sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logge
         var correlationId = httpContext.TraceIdentifier;
 
         logger.LogError(exception,
-            "Unhandled exception caught (CorrelationId: {CorrelationId}, Path: {Path}, Method: {Method})",
+            "Exceção não tratada capturada (CorrelationId: {CorrelationId}, Caminho: {Path}, Método: {Method})",
             correlationId, httpContext.Request.Path, httpContext.Request.Method);
 
         var (statusCode, title) = MapExceptionToStatusCode(exception);

@@ -28,7 +28,7 @@ public sealed class RequestLoggingMiddleware(
             var stopwatch = Stopwatch.StartNew();
 
             logger.LogInformation(
-                "→ {Method} {Path} started (CorrelationId: {CorrelationId})",
+                "→ {Method} {Path} iniciado (CorrelationId: {CorrelationId})",
                 context.Request.Method, context.Request.Path, correlationId);
 
             try
@@ -40,7 +40,7 @@ public sealed class RequestLoggingMiddleware(
                 stopwatch.Stop();
 
                 logger.LogInformation(
-                    "← {Method} {Path} completed with {StatusCode} in {ElapsedMs}ms (CorrelationId: {CorrelationId})",
+                    "← {Method} {Path} concluído com {StatusCode} em {ElapsedMs}ms (CorrelationId: {CorrelationId})",
                     context.Request.Method,
                     context.Request.Path,
                     context.Response.StatusCode,
