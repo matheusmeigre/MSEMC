@@ -21,8 +21,6 @@ using MSEMC.Security;
 using Serilog;
 
 // ── Bootstrap Serilog (early init for startup error capture) ──
-Serilog.Debugging.SelfLog.Enable(msg => Console.Error.WriteLine($"[SERILOG INTERNAL] {msg}"));
-
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
@@ -54,8 +52,6 @@ try
                     new LokiLabel { Key = "app", Value = lokiOptions.AppLabel },
                     new LokiLabel { Key = "environment", Value = lokiOptions.EnvironmentLabel }
                 ],
-                // Apenas label "level" é promovida automaticamente pelo sink
-                // Nenhuma outra propriedade do LogEvent vira label Loki
                 propertiesAsLabels: [],
                 credentials: new LokiCredentials
                 {
