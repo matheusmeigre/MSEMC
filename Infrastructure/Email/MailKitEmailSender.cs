@@ -44,7 +44,7 @@ public sealed class MailKitEmailSender(
                 await client.ConnectAsync(
                     _options.Host,
                     _options.Port,
-                    _options.EnableSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None,
+                    _options.EnableSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.None,
                     ct);
 
                 await client.AuthenticateAsync(_options.Username, _options.Password, ct);
