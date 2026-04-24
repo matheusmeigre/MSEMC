@@ -13,9 +13,9 @@ public sealed class TemplateOptions
     /// <summary>
     /// Caminho raiz absoluto (ou relativo ao ContentRootPath) onde os templates estão armazenados.
     /// Ex: "Templates" (relativo) ou "/app/Templates" (absoluto em container).
+    /// Padrão: "Templates" — pasta sempre publicada junto à aplicação.
     /// </summary>
-    [Required(ErrorMessage = "Templates:BasePath is required")]
-    public required string BasePath { get; init; }
+    public string BasePath { get; init; } = "Templates";
 
     /// <summary>
     /// Locale padrão utilizado como fallback quando o locale solicitado não possui o template.

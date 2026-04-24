@@ -96,8 +96,7 @@ try
 
     builder.Services.AddOptions<TemplateOptions>()
         .BindConfiguration(TemplateOptions.SectionName)
-        .ValidateDataAnnotations()
-        .ValidateOnStart();
+        .ValidateDataAnnotations();
 
     // ── Authentication: API Key ──
     builder.Services.AddAuthentication(ApiKeyAuthenticationHandler.SchemeName)
