@@ -1,0 +1,8 @@
+{
+  "name": "Recibo de Pagamento",
+  "description": "Confirmação de pagamento processado com sucesso.",
+  "domain": "financeiro",
+  "subjectTemplate": "Recibo de pagamento #{{ numeroPagamento }} — {{ valor }}",
+  "requiredVariables": ["nomeCliente", "numeroPagamento", "valor", "dataPagamento", "metodoPagamento"],
+  "optionalVariables": ["descricao", "nomeEmpresa"]
+}

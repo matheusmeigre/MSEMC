@@ -1,0 +1,8 @@
+{
+  "name": "Atualização de Rastreio",
+  "description": "Status de envio da mercadoria com link de rastreamento.",
+  "domain": "ecommerce",
+  "subjectTemplate": "📦 Seu pedido #{{ numeroPedido }} — {{ statusEnvio }}",
+  "requiredVariables": ["nomeCliente", "numeroPedido", "codigoRastreio", "statusEnvio"],
+  "optionalVariables": ["urlRastreio", "nomeEmpresa"]
+}

@@ -22,6 +22,8 @@ public sealed record EmailMessage
 
     public IReadOnlyList<string> BccRecipients { get; init; } = [];
 
+    public IReadOnlyList<EmailAttachment> Attachments { get; init; } = [];
+
     public EmailStatus Status { get; private set; } = EmailStatus.Pending;
 
     public DateTimeOffset CreatedAt { get; init; } = DateTimeOffset.UtcNow;
@@ -39,7 +41,8 @@ public sealed record EmailMessage
         string body,
         bool isHtml = true,
         IReadOnlyList<string>? ccRecipients = null,
-        IReadOnlyList<string>? bccRecipients = null) =>
+        IReadOnlyList<string>? bccRecipients = null,
+        IReadOnlyList<EmailAttachment>? attachments = null) =>
         new()
         {
             Recipient = recipient ?? throw new ArgumentNullException(nameof(recipient)),
@@ -47,7 +50,8 @@ public sealed record EmailMessage
             Body = body ?? throw new ArgumentNullException(nameof(body)),
             IsHtml = isHtml,
             CcRecipients = ccRecipients ?? [],
-            BccRecipients = bccRecipients ?? []
+            BccRecipients = bccRecipients ?? [],
+            Attachments = attachments ?? []
         };
 
     /// <summary>Transiciona a mensagem para o status Sending.</summary>

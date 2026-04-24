@@ -1,0 +1,8 @@
+{
+  "name": "Envio de Relatórios",
+  "description": "Notificação de relatório gerado com documento anexado (PDF, DOCX etc.).",
+  "domain": "relatorios",
+  "subjectTemplate": "📊 Relatório disponível: {{ nomeRelatorio }}",
+  "requiredVariables": ["nomeDestinatario", "nomeRelatorio", "dataGeracao"],
+  "optionalVariables": ["descricaoRelatorio", "observacoes", "nomeEmpresa"]
+}

@@ -28,7 +28,8 @@ public sealed class SendEmailConsumer(
             body: cmd.Body,
             isHtml: cmd.IsHtml,
             ccRecipients: cmd.CcRecipients,
-            bccRecipients: cmd.BccRecipients);
+            bccRecipients: cmd.BccRecipients,
+            attachments: cmd.Attachments);
 
         var result = await emailSender.SendAsync(message, context.CancellationToken);
 

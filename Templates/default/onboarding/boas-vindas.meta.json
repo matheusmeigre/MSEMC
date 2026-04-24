@@ -1,0 +1,8 @@
+{
+  "name": "Boas-vindas",
+  "description": "E-mail de welcome enviado após o usuário finalizar o cadastro.",
+  "domain": "onboarding",
+  "subjectTemplate": "Bem-vindo(a) à {{ nomeEmpresa ?? \"nossa plataforma\" }}, {{ nomeUsuario }}! 🎉",
+  "requiredVariables": ["nomeUsuario"],
+  "optionalVariables": ["nomeEmpresa", "linkPlataforma"]
+}

@@ -13,10 +13,12 @@ using Serilog.Sinks.Grafana.Loki;
 using MSEMC.Infrastructure.Email;
 using MSEMC.Infrastructure.Resilience;
 using MSEMC.Infrastructure.Telemetry;
+using MSEMC.Infrastructure.Templates;
 using MSEMC.Messaging.Consumers;
 using MSEMC.Messaging.Publishers;
 using MSEMC.Middleware;
 using MSEMC.Security;
+using MSEMC.Services;
 using Serilog;
 
 // ── Bootstrap Serilog (early init for startup error capture) ──
@@ -87,6 +89,11 @@ try
         .BindConfiguration(LokiOptions.SectionName)
         .ValidateDataAnnotations();
 
+    builder.Services.AddOptions<TemplateOptions>()
+        .BindConfiguration(TemplateOptions.SectionName)
+        .ValidateDataAnnotations()
+        .ValidateOnStart();
+
     // ── Authentication: API Key ──
     builder.Services.AddAuthentication(ApiKeyAuthenticationHandler.SchemeName)
         .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
@@ -152,6 +159,13 @@ try
     // ── Dependency Injection ──
     builder.Services.AddScoped<IEmailSender, BrevoEmailSender>();
     builder.Services.AddScoped<IEmailQueuePublisher, MassTransitEmailPublisher>();
+
+    // ── Template System ──
+    builder.Services.AddMemoryCache();
+    builder.Services.AddSingleton<ITemplateEngine, ScribanTemplateEngine>();
+    builder.Services.AddSingleton<ITemplateLoader, FileSystemTemplateLoader>();
+    builder.Services.AddSingleton<TemplateVariableValidator>();
+    builder.Services.AddScoped<ITemplateRenderingService, TemplateRenderingService>();
 
     // ── Validation: FluentValidation auto-discovery ──
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -221,6 +235,7 @@ try
 
     // ── Endpoints ──
     app.MapMessageEndpoints();
+    app.MapTemplateEndpoints();
 
     // ── Health Checks Endpoints ──
     app.MapHealthChecks("/health", new HealthCheckOptions

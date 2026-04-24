@@ -10,10 +10,11 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
-    <PackageReference Include="MailKit" Version="4.12.0" />
+    <PackageReference Include="MailKit" Version="4.16.0" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="8.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
     <PackageReference Include="Polly.Extensions" Version="8.6.6" />
+    <PackageReference Include="Scriban" Version="7.1.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.Grafana.Loki" Version="8.3.2" />
@@ -22,6 +23,8 @@
 
   <ItemGroup>
     <None Include=".github\workflows\deploy.yml" />
+    <!-- Garante que os templates HTML e JSON sejam copiados para o diretório de saída -->
+    <Content Update="Templates\**\*.*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

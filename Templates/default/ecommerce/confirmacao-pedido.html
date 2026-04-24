@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pedido #{{ numeroPedido }} Confirmado</title>
+  <style>
+    body{background:#f4f6f9;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;margin:0;padding:0}
+    .wrapper{max-width:600px;margin:32px auto;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+    .header{background:#1a1a2e;padding:28px 32px;text-align:center;color:#fff;font-size:18px;font-weight:600}
+    .body{padding:36px 32px;color:#374151;font-size:15px;line-height:1.7}
+    .body h1{font-size:22px;font-weight:700;color:#111827;margin-bottom:16px}
+    .body p{margin-bottom:14px}
+    table.items{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+    table.items th{background:#f9fafb;padding:10px 12px;text-align:left;font-weight:600;color:#6b7280;border-bottom:2px solid #e5e7eb}
+    table.items td{padding:10px 12px;border-bottom:1px solid #f3f4f6;color:#374151}
+    table.items tr:last-child td{border-bottom:none}
+    .total-row td{font-weight:700;font-size:15px;color:#111827;background:#f9fafb}
+    .address-box{background:#f9fafb;border-radius:8px;padding:14px 18px;margin:18px 0;font-size:14px;color:#374151}
+    .footer{background:#f9fafb;padding:20px 32px;text-align:center;font-size:12px;color:#9ca3af;border-top:1px solid #e5e7eb}
+    .footer a{color:#6b7280}
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">📦 Pedido #{{ numeroPedido }} Confirmado!</div>
+    <div class="body">
+      <h1>Olá, {{ nomeCliente }}!</h1>
+      <p>Seu pedido foi confirmado e está sendo preparado. Confira o resumo abaixo:</p>
+      <table class="items">
+        <thead><tr><th>Produto</th><th>Qtd</th><th>Valor</th></tr></thead>
+        <tbody>
+          {{ for item in itens }}
+          <tr>
+            <td>{{ item.nome }}</td>
+            <td>{{ item.quantidade }}</td>
+            <td>{{ item.valor }}</td>
+          </tr>
+          {{ end }}
+          <tr class="total-row">
+            <td colspan="2">Total</td>
+            <td>{{ valorTotal }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <p><strong>Endereço de entrega:</strong></p>
+      <div class="address-box">{{ enderecoEntrega }}</div>
+      {{ if prazoEntrega }}<p>⏱️ Prazo estimado de entrega: <strong>{{ prazoEntrega }}</strong></p>{{ end }}
+    </div>
+    <div class="footer">
+      <p>Dúvidas? <a href="#">Fale com o suporte</a>.</p>
+      <p><a href="#">Política de Privacidade</a></p>
+    </div>
+  </div>
+</body>
+</html>

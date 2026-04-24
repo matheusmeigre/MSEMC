@@ -1,0 +1,8 @@
+{
+  "name": "Aviso de Vencimento",
+  "description": "Lembrete de cobrança próxima ao vencimento ou em atraso.",
+  "domain": "financeiro",
+  "subjectTemplate": "⚠️ Sua fatura #{{ numeroFatura }} vence em {{ diasRestantes }} dia(s)",
+  "requiredVariables": ["nomeCliente", "numeroFatura", "valor", "dataVencimento", "diasRestantes"],
+  "optionalVariables": ["linkPagamento", "nomeEmpresa"]
+}

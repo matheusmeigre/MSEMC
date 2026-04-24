@@ -1,0 +1,8 @@
+{
+  "name": "Notificação Geral",
+  "description": "Template versátil para newsletters, comunicados e divulgações.",
+  "domain": "engajamento",
+  "subjectTemplate": "{{ titulo }}",
+  "requiredVariables": ["titulo", "conteudo"],
+  "optionalVariables": ["ctaTexto", "ctaUrl", "nomeEmpresa"]
+}
