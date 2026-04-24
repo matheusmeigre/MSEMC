@@ -100,11 +100,20 @@ public static class TemplateEndpoints
         IValidator<PreviewTemplateRequest> validator,
         ITemplateRenderingService renderingService,
         ILogger<Program> logger,
+        HttpContext httpContext,
         CancellationToken cancellationToken)
     {
         // Normaliza URL-encoding: Swagger/clientes codificam '/' como '%2F'
         // Uri.UnescapeDataString converte 'autenticacao%2Fcodigo-seguranca' → 'autenticacao/codigo-seguranca'
         templateId = Uri.UnescapeDataString(templateId);
+
+        // Fallback: aceita templateId via query string (?templateId=ecommerce/confirmacao-pedido)
+        // O catch-all {**templateId} só vincula do path — clientes que usam query param recebem string vazia.
+        if (string.IsNullOrWhiteSpace(templateId))
+        {
+            templateId = httpContext.Request.Query["templateId"].FirstOrDefault() ?? string.Empty;
+            templateId = Uri.UnescapeDataString(templateId);
+        }
 
         // Validação de segurança adicional no templateId (path traversal)
         if (templateId.Contains("..") || templateId.Contains('\\'))
@@ -113,6 +122,16 @@ public static class TemplateEndpoints
                 detail: "Invalid templateId: path traversal is not allowed.",
                 statusCode: StatusCodes.Status400BadRequest,
                 title: "Invalid Template ID");
+        }
+
+        // Garante que templateId não está vazio após todos os fallbacks
+        if (string.IsNullOrWhiteSpace(templateId))
+        {
+            return Results.Problem(
+                detail: "O templateId é obrigatório. Informe-o no path (POST /api/templates/preview/ecommerce/confirmacao-pedido) " +
+                        "ou via query string (?templateId=ecommerce/confirmacao-pedido).",
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Template ID ausente");
         }
 
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
