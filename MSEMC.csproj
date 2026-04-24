@@ -23,8 +23,11 @@
 
   <ItemGroup>
     <None Include=".github\workflows\deploy.yml" />
-    <!-- Garante que os templates HTML e JSON sejam copiados para o diretório de saída -->
-    <Content Update="Templates\**\*.*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- A SDK Web trata .html fora de wwwroot/ como None e .json como Content.
+         None Update adiciona CopyToOutputDirectory aos .html dos templates.
+         Content Update adiciona CopyToOutputDirectory aos .json (meta) dos templates. -->
+    <None Update="Templates\**\*.html" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Update="Templates\**\*.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

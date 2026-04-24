@@ -6,8 +6,9 @@ using MSEMC.Contracts.Responses;
 namespace MSEMC.Endpoints;
 
 /// <summary>
-/// Endpoints de preview de templates — permite visualizar o HTML renderizado
-/// sem enviar o e-mail. Destinado a painéis administrativos.
+/// Endpoints de gerenciamento e preview de templates.
+/// GET  /api/templates              → catálogo de descoberta (todos os templates)
+/// POST /api/templates/preview/{id} → preview do HTML renderizado (sem enviar e-mail)
 /// </summary>
 public static class TemplateEndpoints
 {
@@ -17,18 +18,80 @@ public static class TemplateEndpoints
             .WithTags("Templates")
             .RequireAuthorization();
 
-        // Rota: /preview/{**templateId} — catch-all deve ser o último segmento
+        // ── GET /api/templates ────────────────────────────────────────────────
+        group.MapGet("/", ListTemplates)
+            .WithName("ListTemplates")
+            .WithSummary("Listar todos os templates disponíveis")
+            .WithDescription(
+                "Retorna o catálogo completo de templates cadastrados com:\n" +
+                "- **templateId**: identificador para usar no preview e no envio\n" +
+                "- **requiredVariables**: campos obrigatórios no payload `data`\n" +
+                "- **optionalVariables**: campos opcionais no payload `data`\n" +
+                "- **examplePayload**: exemplo de `data` pronto para copiar no preview\n" +
+                "- **previewEndpoint**: endpoint direto para chamar o preview\n\n" +
+                "Use o filtro `?domain=autenticacao` para listar templates de um domínio específico.")
+            .Produces<ListTemplatesResponse>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status401Unauthorized);
+
+        // ── POST /api/templates/preview/{**templateId} ────────────────────────
+        // Rota: catch-all deve ser o último segmento
         // Exemplo: POST /api/templates/preview/autenticacao/codigo-seguranca
         group.MapPost("/preview/{**templateId}", PreviewTemplate)
             .WithName("PreviewTemplate")
             .WithSummary("Pré-visualizar um template renderizado")
             .WithDescription(
                 "Renderiza o template com os dados fornecidos e retorna o HTML gerado. " +
-                "Não envia e-mail. Use o HTML retornado em um `<iframe>` para preview.")
+                "Não envia e-mail. Use o HTML retornado em um `<iframe>` para preview.\n\n" +
+                "**Dica**: chame `GET /api/templates` primeiro para obter o templateId e o examplePayload.")
             .Produces<PreviewTemplateResponse>(StatusCodes.Status200OK)
             .ProducesValidationProblem()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status401Unauthorized);
+    }
+
+    // ── Handlers ──────────────────────────────────────────────────────────────
+
+    private static async Task<IResult> ListTemplates(
+        ITemplateLoader loader,
+        ILogger<Program> logger,
+        string? domain = null,
+        string? locale = null,
+        CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation(
+            "Listando catálogo de templates (Locale: {Locale}, Domain: {Domain})",
+            locale ?? "default", domain ?? "*");
+
+        var listResult = await loader.ListAsync(locale, domain, cancellationToken);
+
+        if (!listResult.IsSuccess)
+        {
+            return Results.Problem(
+                detail: listResult.Error,
+                statusCode: StatusCodes.Status500InternalServerError,
+                title: "Failed to list templates");
+        }
+
+        var baseUrl = "/api/templates/preview";
+
+        var entries = listResult.Value!
+            .Select(t => new TemplateEntry(
+                TemplateId: t.TemplateId,
+                Name: t.Name,
+                Description: t.Description,
+                Domain: t.Domain,
+                SubjectTemplate: t.SubjectTemplate,
+                RequiredVariables: t.RequiredVariables,
+                OptionalVariables: t.OptionalVariables,
+                ExamplePayload: t.ExamplePayload,
+                PreviewEndpoint: $"POST {baseUrl}/{t.TemplateId}"))
+            .ToList();
+
+        var response = new ListTemplatesResponse(
+            Templates: entries,
+            Total: entries.Count);
+
+        return Results.Ok(response);
     }
 
     private static async Task<IResult> PreviewTemplate(
@@ -39,6 +102,10 @@ public static class TemplateEndpoints
         ILogger<Program> logger,
         CancellationToken cancellationToken)
     {
+        // Normaliza URL-encoding: Swagger/clientes codificam '/' como '%2F'
+        // Uri.UnescapeDataString converte 'autenticacao%2Fcodigo-seguranca' → 'autenticacao/codigo-seguranca'
+        templateId = Uri.UnescapeDataString(templateId);
+
         // Validação de segurança adicional no templateId (path traversal)
         if (templateId.Contains("..") || templateId.Contains('\\'))
         {

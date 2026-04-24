@@ -37,4 +37,18 @@ public interface ITemplateLoader
         string templateId,
         string? locale = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Lista todos os templates disponíveis no armazenamento para um dado locale,
+    /// retornando seus metadados completos (id, nome, domínio, variáveis).
+    /// Ignora arquivos de layout (_layouts/) e qualquer arquivo corrompido.
+    /// </summary>
+    /// <param name="locale">Locale para resolução. Null usa o locale padrão configurado.</param>
+    /// <param name="domain">Filtro opcional por domínio (ex: "autenticacao", "financeiro").</param>
+    /// <param name="cancellationToken">Token de cancelamento.</param>
+    /// <returns>Lista de <see cref="TemplateSummary"/> ou resultado de erro.</returns>
+    Task<Result<IReadOnlyList<TemplateSummary>>> ListAsync(
+        string? locale = null,
+        string? domain = null,
+        CancellationToken cancellationToken = default);
 }
