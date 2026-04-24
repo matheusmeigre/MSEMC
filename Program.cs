@@ -28,6 +28,11 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
+    // ── Railway: bind to dynamic $PORT if set (Railway injects it at runtime) ──
+    var railwayPort = Environment.GetEnvironmentVariable("PORT");
+    if (!string.IsNullOrWhiteSpace(railwayPort))
+        Environment.SetEnvironmentVariable("ASPNETCORE_URLS", $"http://+:{railwayPort}");
+
     var builder = WebApplication.CreateBuilder(args);
 
     // ── Serilog: structured logging from configuration ──
