@@ -1,0 +1,8 @@
+{
+  "name": "Alerta de Segurança",
+  "description": "Notificação de novo login detectado com detalhes de browser, IP, data/hora e localidade.",
+  "domain": "autenticacao",
+  "subjectTemplate": "🚨 Novo acesso detectado à sua conta em {{ dataHora }}",
+  "requiredVariables": ["nomeUsuario", "dataHora", "navegador", "ip", "localidade"],
+  "optionalVariables": ["urlAlterarSenha", "nomeEmpresa"]
+}

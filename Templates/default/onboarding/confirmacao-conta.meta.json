@@ -1,0 +1,8 @@
+{
+  "name": "Confirmação de Conta",
+  "description": "Double opt-in para verificar se o e-mail cadastrado é válido.",
+  "domain": "onboarding",
+  "subjectTemplate": "Confirme seu e-mail para ativar sua conta",
+  "requiredVariables": ["nomeUsuario", "linkConfirmacao", "validadeHoras"],
+  "optionalVariables": ["nomeEmpresa"]
+}

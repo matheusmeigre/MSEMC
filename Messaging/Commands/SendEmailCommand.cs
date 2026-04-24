@@ -12,5 +12,6 @@ public sealed record SendEmailCommand(
     bool IsHtml = true,
     List<string>? CcRecipients = null,
     List<string>? BccRecipients = null,
+    List<MSEMC.Domain.Entities.EmailAttachment>? Attachments = null,
     DateTimeOffset CreatedAt = default
 );

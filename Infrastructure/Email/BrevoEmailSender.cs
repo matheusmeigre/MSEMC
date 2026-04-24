@@ -34,6 +34,13 @@ public sealed class BrevoEmailSender(
         {
             message.MarkAsSending();
 
+            // Monta attachments no formato esperado pela API Brevo
+            object[]? attachments = message.Attachments.Count > 0
+                ? message.Attachments
+                    .Select(a => (object)new { name = a.FileName, content = a.ContentBase64 })
+                    .ToArray()
+                : null;
+
             var payload = new
             {
                 sender = new { name = _options.SenderDisplayName, email = _options.SenderEmail },
@@ -47,6 +54,7 @@ public sealed class BrevoEmailSender(
                 subject = message.Subject,
                 htmlContent = message.IsHtml ? message.Body : null,
                 textContent = message.IsHtml ? null : message.Body,
+                attachment = attachments
             };
 
             var client = httpClientFactory.CreateClient("brevo");

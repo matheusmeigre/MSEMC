@@ -27,6 +27,7 @@ public sealed class MassTransitEmailPublisher(
             IsHtml: message.IsHtml,
             CcRecipients: message.CcRecipients.ToList(),
             BccRecipients: message.BccRecipients.ToList(),
+            Attachments: message.Attachments.Count > 0 ? message.Attachments.ToList() : null,
             CreatedAt: message.CreatedAt);
 
         await publishEndpoint.Publish(command, cancellationToken);

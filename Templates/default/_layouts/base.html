@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>{{ subject }}</title>
+  <style>
+    /* Reset básico compatível com clientes de e-mail */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background-color: #f4f6f9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-text-size-adjust: 100%; }
+    .wrapper { width: 100%; max-width: 600px; margin: 32px auto; background: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    .header { background: #1a1a2e; padding: 28px 32px; text-align: center; }
+    .header img { max-height: 40px; }
+    .header-title { color: #ffffff; font-size: 18px; font-weight: 600; margin-top: 8px; }
+    .body { padding: 36px 32px; color: #374151; font-size: 15px; line-height: 1.7; }
+    .body h1 { font-size: 22px; font-weight: 700; color: #111827; margin-bottom: 16px; }
+    .body p { margin-bottom: 14px; }
+    .btn { display: inline-block; margin: 20px 0; padding: 13px 28px; background: #4f46e5; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-size: 15px; font-weight: 600; }
+    .btn:hover { background: #4338ca; }
+    .code-box { display: inline-block; margin: 16px 0; padding: 14px 32px; background: #f3f4f6; border: 2px dashed #d1d5db; border-radius: 8px; font-size: 30px; font-weight: 800; letter-spacing: 8px; color: #1a1a2e; font-family: 'Courier New', monospace; }
+    .alert-box { padding: 14px 18px; border-radius: 6px; margin: 18px 0; font-size: 14px; }
+    .alert-warning { background: #fff7ed; border-left: 4px solid #f59e0b; color: #92400e; }
+    .alert-success { background: #f0fdf4; border-left: 4px solid #22c55e; color: #166534; }
+    .alert-info { background: #eff6ff; border-left: 4px solid #3b82f6; color: #1e40af; }
+    .divider { height: 1px; background: #e5e7eb; margin: 24px 0; }
+    table.items { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+    table.items th { background: #f9fafb; padding: 10px 12px; text-align: left; font-weight: 600; color: #6b7280; border-bottom: 2px solid #e5e7eb; }
+    table.items td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; color: #374151; }
+    table.items tr:last-child td { border-bottom: none; }
+    .total-row td { font-weight: 700; font-size: 15px; color: #111827; background: #f9fafb; }
+    .footer { background: #f9fafb; padding: 20px 32px; text-align: center; font-size: 12px; color: #9ca3af; border-top: 1px solid #e5e7eb; }
+    .footer a { color: #6b7280; text-decoration: underline; }
+    @media (max-width: 600px) {
+      .wrapper { margin: 0; border-radius: 0; }
+      .body { padding: 24px 20px; }
+      .header { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="header">
+      <div class="header-title">{{ nomeEmpresa ?? "MSEMC" }}</div>
+    </div>
+    <div class="body">
+      {{ block "content" }}{{ end }}
+    </div>
+    <div class="footer">
+      <p>© {{ ano ?? "2026" }} {{ nomeEmpresa ?? "MSEMC" }}. Todos os direitos reservados.</p>
+      <p style="margin-top:6px;">Você recebeu este e-mail pois está cadastrado em nossa plataforma.<br/>
+      <a href="#">Cancelar inscrição</a> · <a href="#">Política de Privacidade</a></p>
+    </div>
+  </div>
+</body>
+</html>

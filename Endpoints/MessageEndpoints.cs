@@ -8,7 +8,7 @@ namespace MSEMC.Endpoints;
 
 /// <summary>
 /// Endpoints Minimal API para operações de mensagens.
-/// Substitui o EmailController legado por uma abordagem mais idiomática do .NET 8.
+/// Suporta dois modos: Template (novo) e Raw (legado).
 /// </summary>
 public static class MessageEndpoints
 {
@@ -22,9 +22,13 @@ public static class MessageEndpoints
         group.MapPost("/", SendMessage)
             .WithName("SendMessage")
             .WithSummary("Enfileirar uma mensagem de e-mail para envio")
-            .WithDescription("Recebe um e-mail e o enfileira para entrega assíncrona via broker de mensagens.")
+            .WithDescription(
+                "Suporta dois modos mutuamente exclusivos:\n" +
+                "- **Template Mode**: forneça `templateId` + `data`. O backend renderiza o HTML via Scriban.\n" +
+                "- **Raw Mode (legado)**: forneça `subject` + `body` diretamente.")
             .Produces<SendEmailResponse>(StatusCodes.Status202Accepted)
             .ProducesValidationProblem()
+            .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status429TooManyRequests);
     }
@@ -33,9 +37,11 @@ public static class MessageEndpoints
         SendEmailRequest request,
         IValidator<SendEmailRequest> validator,
         IEmailQueuePublisher publisher,
+        ITemplateRenderingService renderingService,
         ILogger<Program> logger,
         CancellationToken cancellationToken)
     {
+        // ── Validação de contrato (FluentValidation) ──────────────────────────────
         var validationResult = await validator.ValidateAsync(request, cancellationToken);
         if (!validationResult.IsValid)
         {
@@ -47,18 +53,54 @@ public static class MessageEndpoints
                         g => g.Select(e => e.ErrorMessage).ToArray()));
         }
 
+        // ── Resolução de body + subject ───────────────────────────────────────────
+        string body;
+        string subject;
+
+        if (request.TemplateId is not null)
+        {
+            // MODO TEMPLATE: renderizar via pipeline antes de enfileirar
+            var renderResult = await renderingService.RenderAsync(
+                templateId: request.TemplateId,
+                locale: request.Locale,
+                data: request.Data!.Value,
+                subjectOverride: request.Subject,
+                cancellationToken: cancellationToken);
+
+            if (!renderResult.IsSuccess)
+            {
+                // Determina se é 400 (template não encontrado / dados inválidos) ou 422
+                return Results.Problem(
+                    detail: renderResult.Error,
+                    statusCode: StatusCodes.Status400BadRequest,
+                    title: "Template rendering failed");
+            }
+
+            body = renderResult.Value!.RenderedHtml;
+            subject = renderResult.Value.ResolvedSubject;
+        }
+        else
+        {
+            // MODO RAW: passa body e subject diretamente
+            body = request.Body!;
+            subject = request.Subject!;
+        }
+
+        // ── Criar entidade de domínio ─────────────────────────────────────────────
         var message = EmailMessage.Create(
             recipient: request.Recipient,
-            subject: request.Subject,
-            body: request.Body,
+            subject: subject,
+            body: body,
             isHtml: request.IsHtml,
             ccRecipients: request.CcRecipients,
-            bccRecipients: request.BccRecipients);
+            bccRecipients: request.BccRecipients,
+            attachments: request.Attachments);
 
         logger.LogInformation(
-            "Solicitação de e-mail aceita para {Recipient} (MessageId: {MessageId})",
-            request.Recipient, message.Id);
+            "Solicitação de e-mail aceita para {Recipient} (MessageId: {MessageId}, Mode: {Mode})",
+            request.Recipient, message.Id, request.TemplateId is not null ? "Template" : "Raw");
 
+        // ── Enfileirar para envio assíncrono ─────────────────────────────────────
         await publisher.PublishAsync(message, cancellationToken);
 
         var response = new SendEmailResponse(

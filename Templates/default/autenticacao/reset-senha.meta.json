@@ -1,0 +1,8 @@
+{
+  "name": "Redefinição de Senha",
+  "description": "Link seguro para recuperação de acesso com token de redefinição.",
+  "domain": "autenticacao",
+  "subjectTemplate": "Redefinição de senha solicitada para sua conta",
+  "requiredVariables": ["nomeUsuario", "linkResetSenha", "validadeHoras"],
+  "optionalVariables": ["nomeEmpresa"]
+}

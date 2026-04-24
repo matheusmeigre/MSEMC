@@ -1,0 +1,8 @@
+{
+  "name": "Código de Segurança (OTP/2FA)",
+  "description": "Envio de código de verificação OTP para autenticação de dois fatores.",
+  "domain": "autenticacao",
+  "subjectTemplate": "{{ codigoSeguranca }} é seu código de segurança",
+  "requiredVariables": ["nomeUsuario", "codigoSeguranca", "validadeMinutos"],
+  "optionalVariables": ["nomeEmpresa"]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "Confirmação de Pedido",
+  "description": "Lista de itens comprados, valores e número do pedido.",
+  "domain": "ecommerce",
+  "subjectTemplate": "Pedido #{{ numeroPedido }} confirmado! Obrigado pela sua compra.",
+  "requiredVariables": ["nomeCliente", "numeroPedido", "itens", "valorTotal", "enderecoEntrega"],
+  "optionalVariables": ["prazoEntrega", "nomeEmpresa"]
+}

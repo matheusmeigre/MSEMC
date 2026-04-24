@@ -12,8 +12,7 @@ using Polly.Registry;
 namespace MSEMC.Infrastructure.Email;
 
 /// <summary>
-/// Implementação de envio de e-mail em nível de produção usando MailKit (substitui o obsoleto System.Net.Mail.SmtpClient).
-/// Recursos: async/await completo, TLS adequado, propagação de CancellationToken e logs estruturados.
+/// Implementação de envio de e-mail usando MailKit com suporte a attachments.
 /// </summary>
 public sealed class MailKitEmailSender(
     IOptions<SmtpOptions> options,
@@ -95,20 +94,28 @@ public sealed class MailKitEmailSender(
         mime.To.Add(MailboxAddress.Parse(message.Recipient));
 
         foreach (var cc in message.CcRecipients)
-        {
             mime.Cc.Add(MailboxAddress.Parse(cc));
-        }
 
         foreach (var bcc in message.BccRecipients)
-        {
             mime.Bcc.Add(MailboxAddress.Parse(bcc));
-        }
 
         mime.Subject = message.Subject;
 
-        mime.Body = message.IsHtml
-            ? new BodyBuilder { HtmlBody = message.Body }.ToMessageBody()
-            : new TextPart("plain") { Text = message.Body };
+        var builder = new BodyBuilder();
+
+        if (message.IsHtml)
+            builder.HtmlBody = message.Body;
+        else
+            builder.TextBody = message.Body;
+
+        // Anexar attachments pré-gerados pelo serviço de origem
+        foreach (var attachment in message.Attachments)
+        {
+            var contentType = ContentType.Parse(attachment.ContentType);
+            builder.Attachments.Add(attachment.FileName, attachment.GetContentBytes(), contentType);
+        }
+
+        mime.Body = builder.ToMessageBody();
 
         return mime;
     }

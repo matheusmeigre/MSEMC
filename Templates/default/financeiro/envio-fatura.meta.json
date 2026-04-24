@@ -1,0 +1,8 @@
+{
+  "name": "Envio de Fatura",
+  "description": "Envio de faturas, boletos e links de pagamento para cobranças.",
+  "domain": "financeiro",
+  "subjectTemplate": "Fatura #{{ numeroFatura }} — Vencimento em {{ dataVencimento }}",
+  "requiredVariables": ["nomeCliente", "numeroFatura", "valor", "dataVencimento"],
+  "optionalVariables": ["linkPagamento", "descricao", "nomeEmpresa"]
+}
