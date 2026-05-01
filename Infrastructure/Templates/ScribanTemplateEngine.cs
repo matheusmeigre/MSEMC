@@ -40,6 +40,10 @@ public sealed partial class ScribanTemplateEngine(
                 string.Join(", ", data.Keys), string.Join(", ", debugEntries));
             
             var templateContext = new TemplateContext();
+            // Digest emails com centenas de modelos geram ~5 loops aninhados:
+            // provider_groups → models → (badges + changes + metrics).
+            // O limite padrão de 1000 é insuficiente para payloads grandes.
+            templateContext.LoopLimit = 10_000;
             templateContext.PushGlobal(scriptObject);
 
             // Scriban é síncrono por natureza; envolvemos em Task para respeitar o contrato async
