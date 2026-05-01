@@ -32,13 +32,8 @@ public sealed class ScribanTemplateEngine(
 
             var scriptObject = BuildScriptObject(data);
             logger.LogInformation("Renderizando template com as chaves: {Keys}", string.Join(", ", data.Keys));
-            var templateContext = new TemplateContext
-            {
-                // Normaliza para lowercase para ignorar case-sensitivity entre JSON e Template
-                MemberRenamer = member => member.Name.ToLowerInvariant(),
-                // Strict mode: não silencia variáveis não resolvidas (fail-fast)
-                StrictVariables = false
-            };
+            
+            var templateContext = new TemplateContext();
             templateContext.PushGlobal(scriptObject);
 
             // Scriban é síncrono por natureza; envolvemos em Task para respeitar o contrato async
@@ -76,39 +71,8 @@ public sealed class ScribanTemplateEngine(
     private static ScriptObject BuildScriptObject(IDictionary<string, object?> data)
     {
         var scriptObject = new ScriptObject();
-
-        foreach (var (key, value) in data)
-        {
-            scriptObject[key.ToLowerInvariant()] = ConvertValue(value);
-        }
-
+        scriptObject.Import(data);
         return scriptObject;
-    }
-
-    private static object? ConvertValue(object? value)
-    {
-        return value switch
-        {
-            null => null,
-            string s => s,
-            bool b => b,
-            int or long or double or float or decimal => value,
-            IDictionary<string, object?> dict => BuildScriptObject(dict),
-            System.Collections.IEnumerable enumerable => ConvertArray(enumerable),
-            _ => value
-        };
-    }
-
-    private static ScriptArray ConvertArray(System.Collections.IEnumerable enumerable)
-    {
-        var array = new ScriptArray();
-        foreach (var item in enumerable)
-        {
-            array.Add(item is IDictionary<string, object?> dict
-                ? BuildScriptObject(dict)
-                : ConvertValue(item));
-        }
-        return array;
     }
 
     /// <summary>
