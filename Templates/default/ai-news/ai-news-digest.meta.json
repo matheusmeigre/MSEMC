@@ -1,11 +1,14 @@
 {
-  "Name": "AI News Digest",
-  "Description": "Resumo das últimas atualizações de modelos de IA, provedores, preços e janelas de contexto.",
+  "Name": "AI News Digest V2",
+  "Description": "Relatório inteligente de atualizações de modelos de IA com sumário executivo, agrupamento por provedor, métricas inline e CTAs.",
   "Domain": "ai-news",
-  "SubjectTemplate": "🚀 AI News Digest: Atualizações de Mercado ({{reference_date}})",
+  "SubjectTemplate": "⚡ AI News Digest: {{summary.total_changes}} mudanças — {{summary.total_new_models}} novos modelos ({{reference_date}})",
   "RequiredVariables": [
     "reference_date",
-    "changes"
+    "provider_groups"
   ],
-  "OptionalVariables": []
+  "OptionalVariables": [
+    "summary",
+    "changes"
+  ]
 }

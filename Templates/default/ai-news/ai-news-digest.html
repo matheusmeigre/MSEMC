@@ -5,159 +5,183 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI News Digest</title>
     <style>
-        /* CSS Base (Fallback e clientes modernos) */
         body {
-            margin: 0;
-            padding: 0;
-            background-color: #0f1115;
-            color: #F8FAFC;
+            margin: 0; padding: 0;
+            background-color: #0a0c10;
+            color: #E2E8F0;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
         }
-        table {
-            border-spacing: 0;
-            border-collapse: collapse;
-        }
-        td {
-            padding: 0;
-        }
-        .badge {
-            display: inline-block;
-            font-size: 11px;
-            font-family: 'Courier New', Courier, monospace;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            background-color: #2e3340;
-            color: #cbd5e1;
-        }
-        /* Mobile overrides */
+        table { border-spacing: 0; border-collapse: collapse; }
+        td { padding: 0; }
         @media only screen and (max-width: 600px) {
-            .container {
-                width: 100% !important;
-                padding: 20px 10px !important;
-            }
-            .card-padding {
-                padding: 16px !important;
-            }
-            .h1-title {
-                font-size: 24px !important;
-            }
+            .container { width: 100% !important; padding: 16px 8px !important; }
+            .card-padding { padding: 14px !important; }
+            .h1-title { font-size: 22px !important; }
+            .summary-grid td { display: block !important; width: 100% !important; padding-bottom: 8px !important; }
         }
     </style>
 </head>
-<body style="margin:0; padding:0; background-color:#0f1115; color:#F8FAFC; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #0f1115;">
+<body style="margin:0; padding:0; background-color:#0a0c10; color:#E2E8F0; font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a0c10;">
         <tr>
             <td align="center">
-                <!-- Wrapper Principal -->
-                <table class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; margin:0 auto; padding:40px 20px;">
-                    
-                    <!-- Cabeçalho (Neon/Tech) -->
+                <table class="container" width="620" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:620px; margin:0 auto; padding:32px 16px;">
+
+                    <!-- ═══ HEADER ═══ -->
                     <tr>
-                        <td align="center" style="padding-bottom:40px;">
-                            <h1 class="h1-title" style="margin:0; font-size:28px; font-weight:800; letter-spacing:-0.5px; color:#ffffff;">
-                                <span style="color:#3B82F6;">⚡</span> AI News Digest
+                        <td align="center" style="padding-bottom:32px;">
+                            <h1 class="h1-title" style="margin:0; font-size:26px; font-weight:800; letter-spacing:-0.5px; color:#ffffff;">
+                                <span style="color:#6366F1;">⚡</span> AI News Digest
                             </h1>
-                            <p style="margin:8px 0 0 0; font-size:14px; color:#94A3B8;">
-                                Atualizado em {{reference_date}}
+                            <p style="margin:6px 0 0 0; font-size:13px; color:#64748B; letter-spacing:0.5px;">
+                                {{reference_date}}
                             </p>
                         </td>
                     </tr>
 
-                    <!-- Seção: Breaking Changes -->
+                    <!-- ═══ SUMÁRIO EXECUTIVO ═══ -->
+                    {{ if summary }}
                     <tr>
-                        <td>
-                            <h2 style="font-size:14px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; margin:0 0 16px 0; padding-bottom:8px; border-bottom:1px solid rgba(244, 63, 94, 0.2); color:#F43F5E;">
-                                🚨 Breaking Changes & Alertas de Mercado
-                            </h2>
-                            
-                            {{ for change in changes }}
-                            {{ if change.severity == "Breaking" }}
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1a1d24; border-radius:8px; margin-bottom:16px; border-left:4px solid #F43F5E;">
+                        <td style="padding-bottom:28px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: linear-gradient(135deg, #1e1b4b 0%, #1a1d2e 100%); border-radius:10px; border:1px solid rgba(99,102,241,0.15);">
                                 <tr>
-                                    <td class="card-padding" style="padding:20px;">
-                                        <div style="margin-bottom:12px;">
-                                            <span class="badge" style="display:inline-block; font-size:11px; font-family:monospace; text-transform:uppercase; padding:2px 8px; border-radius:4px; background-color:#2e3340; color:#cbd5e1;">[{{change.provider}}]</span>
-                                            <span style="font-size:12px; color:#F43F5E; margin-left:8px; text-transform:uppercase; letter-spacing:1px; font-weight:600;">• {{change.change_type}}</span>
-                                        </div>
-                                        <h3 style="margin:0 0 12px 0; font-size:18px; color:#F8FAFC; font-weight:600;">
-                                            {{change.model_id}}
-                                        </h3>
-                                        <p style="margin:0; font-size:15px; color:#cbd5e1; line-height:1.6;">
-                                            {{change.description}}
+                                    <td style="padding:20px 24px 8px 24px;">
+                                        <p style="margin:0; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:#818CF8;">
+                                            📊 Sumário Executivo
                                         </p>
-                                        {{ if change.old_value }}
-                                        <div style="margin-top:16px; padding:12px; background-color:rgba(0,0,0,0.25); border-radius:6px; font-family:monospace; font-size:14px;">
-                                            <span style="color:#94A3B8; font-size:12px; text-transform:uppercase;">{{change.field_name}}:</span><br>
-                                            <span style="color:#64748b; text-decoration:line-through;">{{change.old_value}}</span>
-                                            <span style="color:#94A3B8; margin:0 8px;">→</span>
-                                            <span style="color:#10B981; font-weight:bold;">{{change.new_value}}</span>
-                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px 24px 20px 24px;">
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0" class="summary-grid">
+                                            <tr>
+                                                <td width="33%" style="padding-right:12px; vertical-align:top;">
+                                                    <p style="margin:0; font-size:28px; font-weight:800; color:#ffffff; line-height:1;">{{summary.total_new_models}}</p>
+                                                    <p style="margin:2px 0 0 0; font-size:11px; color:#94A3B8; text-transform:uppercase; letter-spacing:0.5px;">Novos Modelos</p>
+                                                </td>
+                                                <td width="33%" style="padding-right:12px; vertical-align:top;">
+                                                    <p style="margin:0; font-size:28px; font-weight:800; color:#ffffff; line-height:1;">{{summary.total_changes}}</p>
+                                                    <p style="margin:2px 0 0 0; font-size:11px; color:#94A3B8; text-transform:uppercase; letter-spacing:0.5px;">Mudanças</p>
+                                                </td>
+                                                <td width="33%" style="vertical-align:top;">
+                                                    <p style="margin:0; font-size:13px; font-weight:600; color:#C4B5FD; line-height:1.4;">
+                                                        {{ for p in summary.providers_affected }}{{p}}{{ if !for.last }}, {{ end }}{{ end }}
+                                                    </p>
+                                                    <p style="margin:2px 0 0 0; font-size:11px; color:#94A3B8; text-transform:uppercase; letter-spacing:0.5px;">Provedores</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        {{ if summary.best_cost_benefit }}
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:14px; background-color:rgba(16,185,129,0.08); border-radius:6px; border:1px solid rgba(16,185,129,0.15);">
+                                            <tr>
+                                                <td style="padding:10px 14px;">
+                                                    <p style="margin:0; font-size:11px; color:#6EE7B7; font-weight:600; text-transform:uppercase; letter-spacing:1px;">💎 Melhor Custo-Benefício</p>
+                                                    <p style="margin:4px 0 0 0; font-size:14px; color:#ffffff; font-weight:600;">
+                                                        {{summary.best_cost_benefit.model_id}}
+                                                        <span style="color:#10B981; font-size:12px; margin-left:6px;">${{summary.best_cost_benefit.price_per_million}}/1M tokens</span>
+                                                        {{ if summary.best_cost_benefit.context_window }}
+                                                        <span style="color:#94A3B8; font-size:12px; margin-left:6px;">• {{summary.best_cost_benefit.context_window}} ctx</span>
+                                                        {{ end }}
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
                                         {{ end }}
                                     </td>
                                 </tr>
                             </table>
-                            {{ end }}
-                            {{ end }}
                         </td>
                     </tr>
+                    {{ end }}
 
-                    <!-- Espaçamento -->
-                    <tr><td height="32"></td></tr>
-
-                    <!-- Seção: Digest / Radar da Semana -->
+                    <!-- ═══ PROVIDER GROUPS ═══ -->
+                    {{ for group in provider_groups }}
                     <tr>
-                        <td>
-                            <h2 style="font-size:14px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; margin:0 0 16px 0; padding-bottom:8px; border-bottom:1px solid rgba(59, 130, 246, 0.2); color:#3B82F6;">
-                                📊 Radar da Semana (Digest)
-                            </h2>
-                            
-                            {{ for change in changes }}
-                            {{ if change.severity == "Digest" }}
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1a1d24; border-radius:8px; margin-bottom:12px; border-left:4px solid #3B82F6;">
+                        <td style="padding-bottom:24px;">
+                            <!-- Provider Header -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:12px;">
                                 <tr>
-                                    <td class="card-padding" style="padding:16px 20px;">
+                                    <td>
+                                        <p style="margin:0; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:#94A3B8; padding-bottom:8px; border-bottom:1px solid rgba(148,163,184,0.1);">
+                                            🏢 {{group.provider_label}}
+                                            <span style="color:#475569; font-weight:400; margin-left:6px;">{{group.model_count}} {{ if group.model_count == 1 }}modelo{{ else }}modelos{{ end }}</span>
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Model Cards -->
+                            {{ for model in group.models }}
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#12141a; border-radius:8px; margin-bottom:10px; border-left:3px solid {{ if model.highest_severity == 'Breaking' }}#F43F5E{{ else }}#6366F1{{ end }};">
+                                <tr>
+                                    <td class="card-padding" style="padding:16px 18px;">
+                                        <!-- Badges -->
                                         <div style="margin-bottom:8px;">
-                                            <span class="badge" style="display:inline-block; font-size:11px; font-family:monospace; text-transform:uppercase; padding:2px 8px; border-radius:4px; background-color:#2e3340; color:#cbd5e1;">[{{change.provider}}]</span>
-                                            <span style="font-size:12px; color:#3B82F6; margin-left:8px; text-transform:uppercase; letter-spacing:1px; font-weight:600;">• {{change.change_type}}</span>
+                                            {{ for badge in model.badges }}
+                                            <span style="display:inline-block; font-size:10px; font-family:'Courier New',monospace; text-transform:uppercase; letter-spacing:0.5px; padding:2px 7px; border-radius:3px; margin-right:4px; {{ if badge == 'new' }}background-color:rgba(16,185,129,0.12); color:#6EE7B7;{{ else if badge == 'price-drop' }}background-color:rgba(251,191,36,0.12); color:#FCD34D;{{ else if badge == 'testing' }}background-color:rgba(99,102,241,0.12); color:#A5B4FC;{{ else if badge == 'context-upgrade' }}background-color:rgba(56,189,248,0.12); color:#7DD3FC;{{ else if badge == 'speed-boost' }}background-color:rgba(244,63,94,0.12); color:#FDA4AF;{{ else if badge == 'elo-rise' }}background-color:rgba(168,85,247,0.12); color:#C4B5FD;{{ else }}background-color:#1e2130; color:#94A3B8;{{ end }}">{{badge}}</span>
+                                            {{ end }}
                                         </div>
-                                        <h3 style="margin:0 0 8px 0; font-size:16px; color:#F8FAFC; font-weight:500;">
-                                            {{change.model_id}}
+
+                                        <!-- Model Name -->
+                                        <h3 style="margin:0 0 6px 0; font-size:15px; color:#F8FAFC; font-weight:600;">
+                                            {{model.model_id}}
                                         </h3>
-                                        <p style="margin:0; font-size:14px; color:#94A3B8; line-height:1.5;">
+
+                                        <!-- Change Descriptions (collapsed) -->
+                                        {{ for change in model.changes }}
+                                        <p style="margin:0 0 3px 0; font-size:13px; color:#94A3B8; line-height:1.5;">
+                                            {{ if change.severity == "Breaking" }}<span style="color:#F43F5E;">●</span>{{ else }}<span style="color:#6366F1;">●</span>{{ end }}
                                             {{change.description}}
                                         </p>
-                                        {{ if change.old_value }}
-                                        <div style="margin-top:12px; padding:8px 12px; background-color:rgba(0,0,0,0.2); border-radius:6px; font-family:monospace; font-size:13px;">
-                                            <span style="color:#94A3B8; font-size:11px; text-transform:uppercase;">{{change.field_name}}:</span> 
-                                            <span style="color:#64748b; text-decoration:line-through;">{{change.old_value}}</span>
-                                            <span style="color:#94A3B8; margin:0 6px;">→</span>
-                                            <span style="color:#10B981;">{{change.new_value}}</span>
+                                        {{ end }}
+
+                                        <!-- Quick Metrics Bar -->
+                                        {{ if model.price_per_million || model.context_window }}
+                                        <div style="margin-top:10px; padding:8px 10px; background-color:rgba(0,0,0,0.3); border-radius:5px; font-family:'Courier New',monospace; font-size:12px;">
+                                            {{ if model.price_per_million }}
+                                            <span style="color:#FCD34D;">💰</span>
+                                            <span style="color:#E2E8F0;">${{model.price_per_million}}/1M</span>
+                                            {{ end }}
+                                            {{ if model.price_per_million && model.context_window }}
+                                            <span style="color:#475569; margin:0 6px;">│</span>
+                                            {{ end }}
+                                            {{ if model.context_window }}
+                                            <span style="color:#7DD3FC;">📐</span>
+                                            <span style="color:#E2E8F0;">{{model.context_window}} ctx</span>
+                                            {{ end }}
+                                        </div>
+                                        {{ end }}
+
+                                        <!-- CTAs -->
+                                        {{ if model.source_url || model.technical_paper_url }}
+                                        <div style="margin-top:10px;">
+                                            {{ if model.source_url }}
+                                            <a href="{{model.source_url}}" style="display:inline-block; font-size:11px; color:#818CF8; text-decoration:none; font-weight:600; letter-spacing:0.3px; padding:4px 0; margin-right:12px;">Ver detalhes →</a>
+                                            {{ end }}
+                                            {{ if model.technical_paper_url }}
+                                            <a href="{{model.technical_paper_url}}" style="display:inline-block; font-size:11px; color:#6EE7B7; text-decoration:none; font-weight:600; letter-spacing:0.3px; padding:4px 0;">📄 Paper</a>
+                                            {{ end }}
                                         </div>
                                         {{ end }}
                                     </td>
                                 </tr>
                             </table>
                             {{ end }}
-                            {{ end }}
                         </td>
                     </tr>
+                    {{ end }}
 
-                    <!-- Espaçamento -->
-                    <tr><td height="40"></td></tr>
-
-                    <!-- Rodapé -->
+                    <!-- ═══ FOOTER ═══ -->
                     <tr>
                         <td align="center" style="border-top:1px solid #1a1d24; padding-top:24px;">
-                            <p style="margin:0; font-size:12px; color:#64748b;">
-                                Enviado por <strong>MSEMC</strong> • Microsserviço de Mensageria
+                            <p style="margin:0; font-size:12px; color:#475569;">
+                                Enviado por <strong style="color:#94A3B8;">MSEMC</strong> • Microsserviço de Mensageria
                             </p>
                             <p style="margin:8px 0 0 0; font-size:12px;">
-                                <a href="#" style="color:#3B82F6; text-decoration:none;">Preferências de Notificação</a>
-                                &nbsp;|&nbsp;
-                                <a href="#" style="color:#3B82F6; text-decoration:none;">Ver no Navegador</a>
+                                <a href="#" style="color:#6366F1; text-decoration:none;">Preferências</a>
+                                &nbsp;·&nbsp;
+                                <a href="#" style="color:#6366F1; text-decoration:none;">Ver no Navegador</a>
                             </p>
                         </td>
                     </tr>
