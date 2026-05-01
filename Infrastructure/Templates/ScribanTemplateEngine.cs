@@ -31,6 +31,7 @@ public sealed class ScribanTemplateEngine(
             }
 
             var scriptObject = BuildScriptObject(data);
+            logger.LogInformation("Renderizando template com as chaves: {Keys}", string.Join(", ", data.Keys));
             var templateContext = new TemplateContext
             {
                 // Normaliza para lowercase para ignorar case-sensitivity entre JSON e Template
