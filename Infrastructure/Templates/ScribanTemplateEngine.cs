@@ -33,8 +33,8 @@ public sealed class ScribanTemplateEngine(
             var scriptObject = BuildScriptObject(data);
             var templateContext = new TemplateContext
             {
-                // Mantém camelCase — nomes das variáveis como chegam do JSON
-                MemberRenamer = member => member.Name,
+                // Normaliza para lowercase para ignorar case-sensitivity entre JSON e Template
+                MemberRenamer = member => member.Name.ToLowerInvariant(),
                 // Strict mode: não silencia variáveis não resolvidas (fail-fast)
                 StrictVariables = false
             };
@@ -78,7 +78,7 @@ public sealed class ScribanTemplateEngine(
 
         foreach (var (key, value) in data)
         {
-            scriptObject[key] = ConvertValue(value);
+            scriptObject[key.ToLowerInvariant()] = ConvertValue(value);
         }
 
         return scriptObject;
