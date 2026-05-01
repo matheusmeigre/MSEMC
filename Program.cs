@@ -98,6 +98,9 @@ try
         .BindConfiguration(TemplateOptions.SectionName)
         .ValidateDataAnnotations();
 
+    builder.Services.AddOptions<GovernanceOptions>()
+        .BindConfiguration(GovernanceOptions.SectionName);
+
     // ── Authentication: API Key ──
     builder.Services.AddAuthentication(ApiKeyAuthenticationHandler.SchemeName)
         .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
@@ -187,6 +190,7 @@ try
     builder.Services.AddSingleton<ITemplateLoader, FileSystemTemplateLoader>();
     builder.Services.AddSingleton<TemplateVariableValidator>();
     builder.Services.AddScoped<ITemplateRenderingService, TemplateRenderingService>();
+    builder.Services.AddSingleton<IRecipientGovernanceService, RecipientGovernanceService>();
 
     // ── Validation: FluentValidation auto-discovery ──
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();

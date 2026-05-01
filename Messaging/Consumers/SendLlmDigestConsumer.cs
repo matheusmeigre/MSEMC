@@ -13,11 +13,29 @@ namespace MSEMC.Messaging.Consumers;
 public sealed class SendLlmDigestConsumer(
     ITemplateRenderingService templateRenderingService,
     IEmailSender emailSender,
+    IRecipientGovernanceService governanceService,
     ILogger<SendLlmDigestConsumer> logger) : IConsumer<SendLlmDigestCommand>
 {
     public async Task Consume(ConsumeContext<SendLlmDigestCommand> context)
     {
         var cmd = context.Message;
+
+        // 0. Governança: valida se o destinatário é permitido
+        if (!governanceService.IsAllowed(cmd.Recipient))
+        {
+            logger.LogWarning("LLM Digest ABORTADO: Destinatário {Recipient} bloqueado pela governança (MessageId: {MessageId}).", 
+                cmd.Recipient, cmd.MessageId);
+                
+            await context.Publish(new EmailFailedEvent(
+                MessageId: cmd.MessageId,
+                Recipient: cmd.Recipient,
+                ErrorMessage: "Destinatário bloqueado pela governança (Whitelist/Blacklist)",
+                RetryCount: 0,
+                FailedAt: DateTimeOffset.UtcNow),
+                context.CancellationToken);
+                
+            return;
+        }
 
         logger.LogInformation(
             "Processando LLM Digest para {Recipient} usando template {TemplateId} (MessageId: {MessageId})",

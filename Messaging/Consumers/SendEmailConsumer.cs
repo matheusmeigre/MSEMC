@@ -12,11 +12,29 @@ namespace MSEMC.Messaging.Consumers;
 /// </summary>
 public sealed class SendEmailConsumer(
     IEmailSender emailSender,
+    IRecipientGovernanceService governanceService,
     ILogger<SendEmailConsumer> logger) : IConsumer<SendEmailCommand>
 {
     public async Task Consume(ConsumeContext<SendEmailCommand> context)
     {
         var cmd = context.Message;
+
+        // 0. Governança: valida se o destinatário é permitido
+        if (!governanceService.IsAllowed(cmd.Recipient))
+        {
+            logger.LogWarning("Envio ABORTADO: Destinatário {Recipient} bloqueado pela governança (MessageId: {MessageId}).", 
+                cmd.Recipient, cmd.MessageId);
+                
+            await context.Publish(new EmailFailedEvent(
+                MessageId: cmd.MessageId,
+                Recipient: cmd.Recipient,
+                ErrorMessage: "Destinatário bloqueado pela governança (Whitelist/Blacklist)",
+                RetryCount: 0,
+                FailedAt: DateTimeOffset.UtcNow),
+                context.CancellationToken);
+                
+            return;
+        }
 
         logger.LogInformation(
             "Processando comando de e-mail para {Recipient} (MessageId: {MessageId})",
