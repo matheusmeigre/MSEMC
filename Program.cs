@@ -132,6 +132,7 @@ try
     builder.Services.AddMassTransit(bus =>
     {
         bus.AddConsumer<SendEmailConsumer>();
+        bus.AddConsumer<SendLlmDigestConsumer>();
 
         if (rabbitConfig is not null && !string.IsNullOrWhiteSpace(rabbitConfig.Host))
         {
@@ -143,7 +144,15 @@ try
                     h.Password(rabbitConfig.Password);
                 });
 
-                cfg.ConfigureEndpoints(context);
+                cfg.ReceiveEndpoint("send-email-queue", e =>
+                {
+                    e.ConfigureConsumer<SendEmailConsumer>(context);
+                });
+
+                cfg.ReceiveEndpoint("send-llm-digest-queue", e =>
+                {
+                    e.ConfigureConsumer<SendLlmDigestConsumer>(context);
+                });
             });
         }
         else
@@ -151,7 +160,15 @@ try
             // Fallback: InMemory transport for development without Docker
             bus.UsingInMemory((context, cfg) =>
             {
-                cfg.ConfigureEndpoints(context);
+                cfg.ReceiveEndpoint("send-email-queue", e =>
+                {
+                    e.ConfigureConsumer<SendEmailConsumer>(context);
+                });
+
+                cfg.ReceiveEndpoint("send-llm-digest-queue", e =>
+                {
+                    e.ConfigureConsumer<SendLlmDigestConsumer>(context);
+                });
             });
         }
     });

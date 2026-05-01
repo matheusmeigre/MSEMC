@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI News Digest</title>
+    <style>
+        /* CSS Base (Fallback e clientes modernos) */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f1115;
+            color: #F8FAFC;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        table {
+            border-spacing: 0;
+            border-collapse: collapse;
+        }
+        td {
+            padding: 0;
+        }
+        .badge {
+            display: inline-block;
+            font-size: 11px;
+            font-family: 'Courier New', Courier, monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background-color: #2e3340;
+            color: #cbd5e1;
+        }
+        /* Mobile overrides */
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+                padding: 20px 10px !important;
+            }
+            .card-padding {
+                padding: 16px !important;
+            }
+            .h1-title {
+                font-size: 24px !important;
+            }
+        }
+    </style>
+</head>
+<body style="margin:0; padding:0; background-color:#0f1115; color:#F8FAFC; font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #0f1115;">
+        <tr>
+            <td align="center">
+                <!-- Wrapper Principal -->
+                <table class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; margin:0 auto; padding:40px 20px;">
+                    
+                    <!-- Cabeçalho (Neon/Tech) -->
+                    <tr>
+                        <td align="center" style="padding-bottom:40px;">
+                            <h1 class="h1-title" style="margin:0; font-size:28px; font-weight:800; letter-spacing:-0.5px; color:#ffffff;">
+                                <span style="color:#3B82F6;">⚡</span> AI News Digest
+                            </h1>
+                            <p style="margin:8px 0 0 0; font-size:14px; color:#94A3B8;">
+                                Atualizado em {{ReferenceDate}}
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Seção: Breaking Changes -->
+                    <tr>
+                        <td>
+                            <h2 style="font-size:14px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; margin:0 0 16px 0; padding-bottom:8px; border-bottom:1px solid rgba(244, 63, 94, 0.2); color:#F43F5E;">
+                                🚨 Breaking Changes & Alertas de Mercado
+                            </h2>
+                            
+                            {{ for change in Changes }}
+                            {{ if change.Severity == "Breaking" }}
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1a1d24; border-radius:8px; margin-bottom:16px; border-left:4px solid #F43F5E;">
+                                <tr>
+                                    <td class="card-padding" style="padding:20px;">
+                                        <div style="margin-bottom:12px;">
+                                            <span class="badge" style="display:inline-block; font-size:11px; font-family:monospace; text-transform:uppercase; padding:2px 8px; border-radius:4px; background-color:#2e3340; color:#cbd5e1;">[{{change.Provider}}]</span>
+                                            <span style="font-size:12px; color:#F43F5E; margin-left:8px; text-transform:uppercase; letter-spacing:1px; font-weight:600;">• {{change.ChangeType}}</span>
+                                        </div>
+                                        <h3 style="margin:0 0 12px 0; font-size:18px; color:#F8FAFC; font-weight:600;">
+                                            {{change.ModelId}}
+                                        </h3>
+                                        <p style="margin:0; font-size:15px; color:#cbd5e1; line-height:1.6;">
+                                            {{change.Description}}
+                                        </p>
+                                        {{ if change.OldValue }}
+                                        <div style="margin-top:16px; padding:12px; background-color:rgba(0,0,0,0.25); border-radius:6px; font-family:monospace; font-size:14px;">
+                                            <span style="color:#94A3B8; font-size:12px; text-transform:uppercase;">{{change.FieldName}}:</span><br>
+                                            <span style="color:#64748b; text-decoration:line-through;">{{change.OldValue}}</span>
+                                            <span style="color:#94A3B8; margin:0 8px;">→</span>
+                                            <span style="color:#10B981; font-weight:bold;">{{change.NewValue}}</span>
+                                        </div>
+                                        {{ end }}
+                                    </td>
+                                </tr>
+                            </table>
+                            {{ end }}
+                            {{ end }}
+                        </td>
+                    </tr>
+
+                    <!-- Espaçamento -->
+                    <tr><td height="32"></td></tr>
+
+                    <!-- Seção: Digest / Radar da Semana -->
+                    <tr>
+                        <td>
+                            <h2 style="font-size:14px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; margin:0 0 16px 0; padding-bottom:8px; border-bottom:1px solid rgba(59, 130, 246, 0.2); color:#3B82F6;">
+                                📊 Radar da Semana (Digest)
+                            </h2>
+                            
+                            {{ for change in Changes }}
+                            {{ if change.Severity == "Digest" }}
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#1a1d24; border-radius:8px; margin-bottom:12px; border-left:4px solid #3B82F6;">
+                                <tr>
+                                    <td class="card-padding" style="padding:16px 20px;">
+                                        <div style="margin-bottom:8px;">
+                                            <span class="badge" style="display:inline-block; font-size:11px; font-family:monospace; text-transform:uppercase; padding:2px 8px; border-radius:4px; background-color:#2e3340; color:#cbd5e1;">[{{change.Provider}}]</span>
+                                            <span style="font-size:12px; color:#3B82F6; margin-left:8px; text-transform:uppercase; letter-spacing:1px; font-weight:600;">• {{change.ChangeType}}</span>
+                                        </div>
+                                        <h3 style="margin:0 0 8px 0; font-size:16px; color:#F8FAFC; font-weight:500;">
+                                            {{change.ModelId}}
+                                        </h3>
+                                        <p style="margin:0; font-size:14px; color:#94A3B8; line-height:1.5;">
+                                            {{change.Description}}
+                                        </p>
+                                        {{ if change.OldValue }}
+                                        <div style="margin-top:12px; padding:8px 12px; background-color:rgba(0,0,0,0.2); border-radius:6px; font-family:monospace; font-size:13px;">
+                                            <span style="color:#94A3B8; font-size:11px; text-transform:uppercase;">{{change.FieldName}}:</span> 
+                                            <span style="color:#64748b; text-decoration:line-through;">{{change.OldValue}}</span>
+                                            <span style="color:#94A3B8; margin:0 6px;">→</span>
+                                            <span style="color:#10B981;">{{change.NewValue}}</span>
+                                        </div>
+                                        {{ end }}
+                                    </td>
+                                </tr>
+                            </table>
+                            {{ end }}
+                            {{ end }}
+                        </td>
+                    </tr>
+
+                    <!-- Espaçamento -->
+                    <tr><td height="40"></td></tr>
+
+                    <!-- Rodapé -->
+                    <tr>
+                        <td align="center" style="border-top:1px solid #1a1d24; padding-top:24px;">
+                            <p style="margin:0; font-size:12px; color:#64748b;">
+                                Enviado por <strong>MSEMC</strong> • Microsserviço de Mensageria
+                            </p>
+                            <p style="margin:8px 0 0 0; font-size:12px;">
+                                <a href="#" style="color:#3B82F6; text-decoration:none;">Preferências de Notificação</a>
+                                &nbsp;|&nbsp;
+                                <a href="#" style="color:#3B82F6; text-decoration:none;">Ver no Navegador</a>
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
