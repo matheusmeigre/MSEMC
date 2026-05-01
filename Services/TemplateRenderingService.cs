@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using MSEMC.Abstractions;
 using MSEMC.Infrastructure.Templates;
 using MSEMC.Domain.Results;
@@ -10,7 +11,7 @@ namespace MSEMC.Services;
 /// Load Content → Load Metadata → Validate Variables → Render Body → Render Subject.
 /// Registrado como Scoped — recebe ITemplateLoader e ITemplateEngine Singleton com segurança.
 /// </summary>
-public sealed class TemplateRenderingService(
+public sealed partial class TemplateRenderingService(
     ITemplateLoader loader,
     ITemplateEngine engine,
     TemplateVariableValidator validator,
@@ -99,7 +100,8 @@ public sealed class TemplateRenderingService(
 
     /// <summary>
     /// Converte recursivamente um JsonElement para IDictionary&lt;string, object?&gt;.
-    /// Suporta: objetos aninhados, arrays, strings, números, booleans, null.
+    /// Registra cada propriedade tanto com o nome original (camelCase do JSON)
+    /// quanto em snake_case para compatibilidade com templates Scriban.
     /// </summary>
     private static Dictionary<string, object?> ConvertJsonElement(JsonElement element)
     {
@@ -110,7 +112,16 @@ public sealed class TemplateRenderingService(
 
         foreach (var property in element.EnumerateObject())
         {
-            result[property.Name] = ConvertJsonValue(property.Value);
+            var value = ConvertJsonValue(property.Value);
+            
+            // Registra com o nome original (ex: "referenceDate")
+            result[property.Name] = value;
+            
+            // Registra também em snake_case (ex: "reference_date")
+            // para compatibilidade com templates Scriban
+            var snakeKey = ToSnakeCase(property.Name);
+            if (snakeKey != property.Name)
+                result[snakeKey] = value;
         }
 
         return result;
@@ -132,4 +143,18 @@ public sealed class TemplateRenderingService(
             _ => element.GetRawText()
         };
     }
+
+    /// <summary>
+    /// Converte camelCase/PascalCase para snake_case.
+    /// Ex: "referenceDate" → "reference_date"
+    /// </summary>
+    private static string ToSnakeCase(string input)
+    {
+        if (string.IsNullOrEmpty(input)) return input;
+        return SnakeCaseRegex().Replace(input, "_$1").ToLowerInvariant().TrimStart('_');
+    }
+
+    [GeneratedRegex("([A-Z])")]
+    private static partial Regex SnakeCaseRegex();
 }
+

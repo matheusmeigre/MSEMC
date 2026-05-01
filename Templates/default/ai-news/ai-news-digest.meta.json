@@ -2,10 +2,10 @@
   "Name": "AI News Digest",
   "Description": "Resumo das últimas atualizações de modelos de IA, provedores, preços e janelas de contexto.",
   "Domain": "ai-news",
-  "SubjectTemplate": "🚀 AI News Digest: Atualizações de Mercado ({{ReferenceDate}})",
+  "SubjectTemplate": "🚀 AI News Digest: Atualizações de Mercado ({{reference_date}})",
   "RequiredVariables": [
-    "ReferenceDate",
-    "Changes"
+    "reference_date",
+    "changes"
   ],
   "OptionalVariables": []
 }
