@@ -1,0 +1,27 @@
+# ── Stage 1: Build ──
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+COPY MSEMC.sln .
+COPY MSEMC.Shared/MSEMC.Shared.csproj MSEMC.Shared/
+COPY MSEMC.Api/MSEMC.Api.csproj MSEMC.Api/
+COPY MSEMC.Worker/MSEMC.Worker.csproj MSEMC.Worker/
+COPY tests/MSEMC.UnitTests/MSEMC.UnitTests.csproj tests/MSEMC.UnitTests/
+
+RUN dotnet restore
+
+COPY . .
+RUN dotnet publish MSEMC.Worker/MSEMC.Worker.csproj -c Release -o /app --no-restore
+
+# ── Stage 2: Runtime ──
+FROM mcr.microsoft.com/dotnet/runtime:8.0 AS runtime
+
+RUN groupadd --gid 1000 appgroup \
+    && useradd --uid 1000 --gid 1000 --create-home appuser
+
+WORKDIR /app
+COPY --from=build /app .
+
+USER appuser
+
+ENTRYPOINT ["dotnet", "MSEMC.Worker.dll"]

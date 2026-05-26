@@ -18,7 +18,6 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      # Cache NuGet para acelerar o pipeline
       - name: Cache NuGet packages
         uses: actions/cache@v4
         with:
@@ -27,24 +26,24 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      # Auditoria de vulnerabilidades nas dependências
       - name: Security Audit
         run: dotnet list package --vulnerable || true
 
       - name: Restore dependencies
         run: dotnet restore
 
-      # Analyzers habilitados direto no build, sem step separado
       - name: Build
         run: dotnet build --no-restore --configuration Release /p:EnableNETAnalyzers=true
 
       - name: Run Tests
         run: dotnet test --no-restore --no-build --configuration Release --verbosity normal
 
-      - name: Publish
-        run: dotnet publish --no-restore --no-build --configuration Release -o out
+      - name: Publish API
+        run: dotnet publish MSEMC.Api/MSEMC.Api.csproj --no-restore --no-build --configuration Release -o out/api
 
-      # Deploy — substitua pelo step real (Render, Railway, Azure, etc.)
+      - name: Publish Worker
+        run: dotnet publish MSEMC.Worker/MSEMC.Worker.csproj --no-restore --no-build --configuration Release -o out/worker
+
       - name: Deploy
         env:
           Smtp__Username: ${{ secrets.SMTP_USERNAME }}

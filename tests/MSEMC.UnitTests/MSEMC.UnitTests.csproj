@@ -22,7 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\MSEMC.csproj" />
+    <ProjectReference Include="..\..\MSEMC.Shared\MSEMC.Shared.csproj" />
+    <ProjectReference Include="..\..\MSEMC.Api\MSEMC.Api.csproj" />
   </ItemGroup>
 
 </Project>

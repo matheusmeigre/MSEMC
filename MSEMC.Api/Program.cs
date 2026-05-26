@@ -10,32 +10,25 @@ using MSEMC.Abstractions;
 using MSEMC.Configuration;
 using MSEMC.Endpoints;
 using Serilog.Sinks.Grafana.Loki;
-using MSEMC.Infrastructure.Email;
-using MSEMC.Infrastructure.Resilience;
-using MSEMC.Infrastructure.Telemetry;
 using MSEMC.Infrastructure.Templates;
-using MSEMC.Messaging.Consumers;
 using MSEMC.Messaging.Publishers;
 using MSEMC.Middleware;
 using MSEMC.Security;
 using MSEMC.Services;
 using Serilog;
 
-// ── Bootstrap Serilog (early init for startup error capture) ──
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateBootstrapLogger();
 
 try
 {
-    // ── Railway: bind to dynamic $PORT if set (Railway injects it at runtime) ──
     var railwayPort = Environment.GetEnvironmentVariable("PORT");
     if (!string.IsNullOrWhiteSpace(railwayPort))
         Environment.SetEnvironmentVariable("ASPNETCORE_URLS", $"http://+:{railwayPort}");
 
     var builder = WebApplication.CreateBuilder(args);
 
-    // ── Serilog: structured logging from configuration ──
     builder.Host.UseSerilog((context, services, configuration) =>
     {
         var lokiOptions = context.Configuration
@@ -67,16 +60,6 @@ try
         }
     });
 
-    // ── Configuration: Options Pattern with validation at startup ──
-    builder.Services.AddOptions<SmtpOptions>()
-        .BindConfiguration(SmtpOptions.SectionName)
-        .ValidateDataAnnotations();
-
-    builder.Services.AddOptions<BrevoOptions>()
-        .BindConfiguration(BrevoOptions.SectionName)
-        .ValidateDataAnnotations()
-        .ValidateOnStart();
-
     builder.Services.AddOptions<ApiKeyOptions>()
         .BindConfiguration(ApiKeyOptions.SectionName)
         .ValidateDataAnnotations()
@@ -98,16 +81,11 @@ try
         .BindConfiguration(TemplateOptions.SectionName)
         .ValidateDataAnnotations();
 
-    builder.Services.AddOptions<GovernanceOptions>()
-        .BindConfiguration(GovernanceOptions.SectionName);
-
-    // ── Authentication: API Key ──
     builder.Services.AddAuthentication(ApiKeyAuthenticationHandler.SchemeName)
         .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
             ApiKeyAuthenticationHandler.SchemeName, null);
     builder.Services.AddAuthorization();
 
-    // ── Rate Limiting: Fixed Window ──
     var rateLimitConfig = builder.Configuration
         .GetSection(RateLimitOptions.SectionName)
         .Get<RateLimitOptions>() ?? new RateLimitOptions { PermitLimit = 100, WindowSeconds = 60 };
@@ -124,19 +102,12 @@ try
         });
     });
 
-    // ── Resilience: Polly v8 pipelines ──
-    builder.Services.AddSmtpResilience();
-
-    // ── Messaging: MassTransit + RabbitMQ ──
     var rabbitConfig = builder.Configuration
         .GetSection(RabbitMqOptions.SectionName)
         .Get<RabbitMqOptions>();
 
     builder.Services.AddMassTransit(bus =>
     {
-        bus.AddConsumer<SendEmailConsumer>();
-        bus.AddConsumer<SendLlmDigestConsumer>();
-
         if (rabbitConfig is not null && !string.IsNullOrWhiteSpace(rabbitConfig.Host))
         {
             bus.UsingRabbitMq((context, cfg) =>
@@ -146,66 +117,29 @@ try
                     h.Username(rabbitConfig.Username);
                     h.Password(rabbitConfig.Password);
                 });
-
-                cfg.ReceiveEndpoint("send-email-queue", e =>
-                {
-                    e.ConfigureConsumer<SendEmailConsumer>(context);
-                });
-
-                cfg.ReceiveEndpoint("send-llm-digest-queue", e =>
-                {
-                    e.ConfigureConsumer<SendLlmDigestConsumer>(context);
-                });
             });
         }
         else
         {
-            // Fallback: InMemory transport for development without Docker
-            bus.UsingInMemory((context, cfg) =>
-            {
-                cfg.ReceiveEndpoint("send-email-queue", e =>
-                {
-                    e.ConfigureConsumer<SendEmailConsumer>(context);
-                });
-
-                cfg.ReceiveEndpoint("send-llm-digest-queue", e =>
-                {
-                    e.ConfigureConsumer<SendLlmDigestConsumer>(context);
-                });
-            });
+            bus.UsingInMemory();
         }
     });
 
-    // ── Brevo: HTTP email API (SMTP-free) ──
-    builder.Services.AddHttpClient("brevo", client =>
-        client.BaseAddress = new Uri("https://api.brevo.com/v3/"));
-
-    // ── Dependency Injection ──
-    builder.Services.AddScoped<IEmailSender, BrevoEmailSender>();
     builder.Services.AddScoped<IEmailQueuePublisher, MassTransitEmailPublisher>();
 
-    // ── Template System ──
     builder.Services.AddMemoryCache();
     builder.Services.AddSingleton<ITemplateEngine, ScribanTemplateEngine>();
     builder.Services.AddSingleton<ITemplateLoader, FileSystemTemplateLoader>();
     builder.Services.AddSingleton<TemplateVariableValidator>();
     builder.Services.AddScoped<ITemplateRenderingService, TemplateRenderingService>();
-    builder.Services.AddSingleton<IRecipientGovernanceService, RecipientGovernanceService>();
 
-    // ── Validation: FluentValidation auto-discovery ──
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
-    // ── Error Handling: RFC 7807 Problem Details ──
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
 
-    // ── Health Checks ──
     builder.Services.AddHealthChecks();
 
-    // ── OpenTelemetry: Custom Metrics ──
-    builder.Services.AddSingleton(MsemcTelemetry.ActivitySource);
-
-    // ── API: Swagger with API Key support ──
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
     {
@@ -243,7 +177,6 @@ try
 
     var app = builder.Build();
 
-    // ── Middleware Pipeline (order matters) ──
     app.UseExceptionHandler();
     app.UseMiddleware<RequestLoggingMiddleware>();
 
@@ -258,53 +191,23 @@ try
     app.UseAuthorization();
     app.UseRateLimiter();
 
-    // ── Endpoints ──
     app.MapMessageEndpoints();
     app.MapTemplateEndpoints();
 
-    // ── Health Checks Endpoints ──
     app.MapHealthChecks("/health", new HealthCheckOptions
     {
-        Predicate = _ => false // Liveness: always 200 if app is running
+        Predicate = _ => false
     }).AllowAnonymous();
 
-    app.MapHealthChecks("/health/ready", new HealthCheckOptions
-    {
-        Predicate = check => check.Tags.Contains("ready"),
-        ResponseWriter = WriteHealthCheckResponse
-    }).AllowAnonymous();
-
-    Log.Information("MSEMC iniciando em {Environment}", app.Environment.EnvironmentName);
+    Log.Information("MSEMC.Api iniciando em {Environment}", app.Environment.EnvironmentName);
 
     app.Run();
 }
 catch (Exception ex)
 {
-    Log.Fatal(ex, "MSEMC encerrado inesperadamente");
+    Log.Fatal(ex, "MSEMC.Api encerrado inesperadamente");
 }
 finally
 {
     Log.CloseAndFlush();
-}
-
-// ── Health Check Response Writer ──
-static Task WriteHealthCheckResponse(HttpContext context, HealthReport report)
-{
-    context.Response.ContentType = "application/json";
-
-    var response = new
-    {
-        status = report.Status.ToString(),
-        duration = report.TotalDuration.TotalMilliseconds,
-        checks = report.Entries.Select(e => new
-        {
-            name = e.Key,
-            status = e.Value.Status.ToString(),
-            description = e.Value.Description,
-            duration = e.Value.Duration.TotalMilliseconds,
-            data = e.Value.Data
-        })
-    };
-
-    return context.Response.WriteAsJsonAsync(response);
 }
